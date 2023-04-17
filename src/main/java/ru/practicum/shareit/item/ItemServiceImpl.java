@@ -9,7 +9,7 @@ import ru.practicum.shareit.item.model.Item;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.item.ItemMapper.DtoInItem;
+import static ru.practicum.shareit.item.ItemMapper.dtoInItem;
 import static ru.practicum.shareit.item.ItemMapper.itemInDto;
 
 @Service
@@ -33,14 +33,14 @@ public class ItemServiceImpl implements ItemService {
         if (inputItemDto.getAvailable() != null) {
             oldItem.setAvailable(inputItemDto.getAvailable());
         }
-        Item item = itemRepository.update(DtoInItem(oldItem));
+        Item item = itemRepository.update(dtoInItem(oldItem));
         return itemInDto(item);
     }
 
     @Override
     public ItemDto create(ItemDto inputItemDto, Long ownerId) {
         inputItemDto.setId(++currentId);
-        Item newItem = itemRepository.create(ownerId, DtoInItem(inputItemDto));
+        Item newItem = itemRepository.create(ownerId, dtoInItem(inputItemDto));
         return itemInDto(newItem);
     }
 
