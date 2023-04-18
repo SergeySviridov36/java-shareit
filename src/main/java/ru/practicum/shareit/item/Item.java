@@ -1,11 +1,8 @@
-package ru.practicum.shareit.item.model;
+package ru.practicum.shareit.item;
 
 import lombok.*;
-import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.ItemRequest;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Setter
 @Getter
 @AllArgsConstructor

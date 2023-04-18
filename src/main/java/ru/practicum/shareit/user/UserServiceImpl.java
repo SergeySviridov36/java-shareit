@@ -4,12 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidateException;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.model.User;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.user.UserMapper.userDtoInUser;
@@ -19,7 +15,6 @@ import static ru.practicum.shareit.user.UserMapper.userInDTO;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final Set<String> listEmail = new HashSet<>();
 
     @Override
     public List<UserDto> findAllUsers() {
@@ -30,13 +25,13 @@ public class UserServiceImpl implements UserService {
     public UserDto create(UserDto inputUserDto) {
         checkingEmailCreating(inputUserDto);
         User user = userRepository.create(userDtoInUser(inputUserDto));
-        listEmail.add(inputUserDto.getEmail());
+        userRepository.getListEmail().add(inputUserDto.getEmail());
         return userInDTO(user);
     }
 
     @Override
     public void deleteUser(Long userId) {
-        listEmail.remove(findUserById(userId).getEmail());
+        userRepository.getListEmail().remove(findUserById(userId).getEmail());
         userRepository.deleteUser(userId);
     }
 
@@ -56,10 +51,10 @@ public class UserServiceImpl implements UserService {
             userDto.setName(inputUserDto.getName());
         }
         if (inputUserDto.getEmail() != null) {
-            listEmail.remove(userDto.getEmail());
+            userRepository.getListEmail().remove(userDto.getEmail());
             checkingEmailCreating(inputUserDto);
             userDto.setEmail(inputUserDto.getEmail());
-            listEmail.add(inputUserDto.getEmail());
+            userRepository.getListEmail().add(inputUserDto.getEmail());
         }
         User user = userDtoInUser(userDto);
         user.setId(userId);
@@ -68,7 +63,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void checkingEmailCreating(User inputUser) {
-        if (listEmail.contains(inputUser.getEmail()))
+        if (userRepository.getListEmail().contains(inputUser.getEmail()))
             throw new ValidateException("Ошибка!Такой Email уже зарегистрирован");
     }
 }

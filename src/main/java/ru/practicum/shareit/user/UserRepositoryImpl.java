@@ -5,12 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.user.model.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Getter
 @Setter
@@ -19,6 +15,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class UserRepositoryImpl implements UserRepository {
     Map<Long, User> usersMap = new HashMap<>();
+    private final Set<String> listEmail = new HashSet<>();
     private Long currentId = 0L;
 
     @Override
@@ -47,5 +44,10 @@ public class UserRepositoryImpl implements UserRepository {
     public User updateUser(User userDtoInUser) {
         usersMap.put(userDtoInUser.getId(), userDtoInUser);
         return usersMap.get(userDtoInUser.getId());
+    }
+
+    @Override
+    public Set<String> getListEmail() {
+        return listEmail;
     }
 }

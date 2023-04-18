@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.item.model.Item;
 
 import java.util.HashMap;
 import java.util.List;

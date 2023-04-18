@@ -3,15 +3,11 @@ package ru.practicum.shareit.user;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.exception.ExeptionNotFound;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.exception.NotFoundEntityExeption;
 
 import javax.validation.Valid;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -22,7 +18,7 @@ public class UserController {
     @PostMapping()
     public UserDto create(@Valid @RequestBody UserDto inputUserDto) {
         if (inputUserDto.getEmail() == null) {
-            throw new ExeptionNotFound("Ошибка! Поле email пустое");
+            throw new NotFoundEntityExeption("Ошибка! Поле email пустое");
         }
         UserDto userDto = userService.create(inputUserDto);
         log.debug("Создание пользователя: {}", inputUserDto);

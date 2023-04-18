@@ -19,9 +19,9 @@ public class ExceptionHandlers {
 
     @ExceptionHandler
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public ErrorException exceptionHandler(ExeptionNotFound exeptionNotFound) {
-        log.debug(exeptionNotFound.getMessage());
-        return new ErrorException(System.currentTimeMillis(), exeptionNotFound.getMessage());
+    public ErrorException exceptionHandler(NotFoundEntityExeption notFoundEntityExeption) {
+        log.debug(notFoundEntityExeption.getMessage());
+        return new ErrorException(System.currentTimeMillis(), notFoundEntityExeption.getMessage());
     }
 
     @ExceptionHandler

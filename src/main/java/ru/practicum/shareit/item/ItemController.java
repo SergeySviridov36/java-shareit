@@ -3,8 +3,7 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.exception.ExeptionNotFound;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.exception.NotFoundEntityExeption;
 import ru.practicum.shareit.user.UserService;
 
 import java.util.ArrayList;
@@ -68,7 +67,7 @@ public class ItemController {
                 inputItemDto.getDescription() == null ||
                 inputItemDto.getDescription().isBlank() ||
                 inputItemDto.getAvailable() == null) {
-            throw new ExeptionNotFound("Ошибка! Не все поля заполнены");
+            throw new NotFoundEntityExeption("Ошибка! Не все поля заполнены");
         }
     }
 }
