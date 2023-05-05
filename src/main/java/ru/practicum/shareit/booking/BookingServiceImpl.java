@@ -31,14 +31,14 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto create(BookingDtoJson bookingJsonDto, Long userId) {
         if (bookingJsonDto.getEnd().isBefore(bookingJsonDto.getStart()) ||
                 bookingJsonDto.getEnd().equals(bookingJsonDto.getStart()))
-            throw new NotFoundException("Ошибка даты бронирования.");
+            throw new NotFoundEntityExeption("Ошибка даты бронирования.");
         final Long itemId = bookingJsonDto.getItemId();
         final User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundEntityExeption("Пользователь с id : " + userId + " не найден."));
         final Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundEntityExeption("Предмет с id : " + itemId + " не найден."));
         if (!item.getIsAvailable())
-            throw new NotFoundException("Item не доступен для бронирования.");
+            throw new NotFoundEntityExeption("Item не доступен для бронирования.");
         final Long id = item.getOwner().getId();
         if (Objects.equals(id, userId))
             throw new NotFoundEntityExeption("Бронирование своего item запрещено.");
@@ -49,10 +49,10 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto update(Long bookingId, Long userId, boolean isApproved) {
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundEntityExeption("Booking с идентификатором : " + bookingId + " не найден."));
+                .orElseThrow(() -> new NotFoundException("Booking с идентификатором : " + bookingId + " не найден."));
         final Long id = booking.getItem().getOwner().getId();
         if (!Objects.equals(id, userId))
-            throw new NotFoundEntityExeption("Пользователь с идентификатором : " + userId + " не может обновить статус item.");
+            throw new NotFoundException("Пользователь с идентификатором : " + userId + " не может обновить статус item.");
         if (!booking.getStatus().equals(Status.WAITING))
             throw new NotFoundException("Статус booker должен быть WAITING.");
         if (isApproved)
