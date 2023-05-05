@@ -9,5 +9,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ErrorException {
     private long timeException;
-    private String messageException;
+    private String error;
 }

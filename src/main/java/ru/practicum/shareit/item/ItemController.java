@@ -21,7 +21,6 @@ public class ItemController {
     @PostMapping
     public ItemDto create(@RequestBody ItemDto inputItemDto,
                           @RequestHeader(OWNER) Long owner) {
-        userService.findUserById(owner);
         checkingCreating(inputItemDto);
         ItemDto createItem = itemService.create(inputItemDto, owner);
         log.debug("Добавление вещи пользователем: {}", owner);
@@ -38,15 +37,16 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto findItemById(@PathVariable Long itemId) {
-        ItemDto itemDto = itemService.findItemById(itemId);
+    public ItemDtoBooking findItemById(@PathVariable Long itemId,
+                                       @RequestHeader(OWNER) Long owner) {
+        ItemDtoBooking itemDto = itemService.findItemById(itemId,owner);
         log.debug("Просмотр вещи с id: {}", itemId);
         return itemDto;
     }
 
     @GetMapping
-    public List<ItemDto> findAllItems(@RequestHeader(OWNER) Long owner) {
-        List<ItemDto> allItems = itemService.findAllItemsOwner(owner);
+    public List<ItemDtoBooking> findAllItems(@RequestHeader(OWNER) Long owner) {
+        List<ItemDtoBooking> allItems = itemService.findAllItemsOwner(owner);
         log.debug("Получение списка всех вещей");
         return allItems;
     }

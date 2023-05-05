@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import lombok.*;
+import ru.practicum.shareit.user.User;
 
 @Getter
 @Setter
@@ -13,7 +14,7 @@ public class ItemDto {
     private String name;
     private String description;
     private Boolean available;
-    private Long owner;
+    private User owner;
     private Long request;
 }
 
