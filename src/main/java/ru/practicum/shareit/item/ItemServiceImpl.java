@@ -120,7 +120,7 @@ public class ItemServiceImpl implements ItemService {
                 .filter(booking -> Objects.equals(booking.getBooker().getId(), userId))
                 .collect(Collectors.toList());
         if (bookings.isEmpty()) {
-            throw new NotFoundEntityExeption("Невозможно оставить отзыв.");
+            throw new NotFoundEntityExeption("Ошибка, невозможно оставить отзыв.");
         }
         comment.setAuthor(author);
         comment.setItem(item);
