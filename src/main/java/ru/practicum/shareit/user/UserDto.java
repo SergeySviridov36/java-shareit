@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user;
 
 import lombok.*;
+import ru.practicum.shareit.user.User;
 
 import javax.validation.constraints.Email;
 
@@ -8,9 +9,9 @@ import javax.validation.constraints.Email;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 @ToString
-public class User {
+public class UserDto extends User {
     private Long id;
     private String name;
     @Email
