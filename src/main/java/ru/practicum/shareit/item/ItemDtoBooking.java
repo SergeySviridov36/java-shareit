@@ -23,7 +23,7 @@ public class ItemDtoBooking {
     private BookingItemDto lastBooking;
     private BookingItemDto nextBooking;
 
-    public ItemDtoBooking(Long id, String name, String description, Boolean available,User owner, Long request ) {
+    public ItemDtoBooking(Long id, String name, String description, Boolean available,User owner, Long request) {
         this.id = id;
         this.name = name;
         this.description = description;
