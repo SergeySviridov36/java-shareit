@@ -36,9 +36,9 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto update(ItemDto inputItemDto, Long ownerId, Long itemId) {
         final Item oldItem = itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundEntityExeption("Предмет с id : " + itemId + " не найден."));
+                .orElseThrow(() -> new NotFoundException("Предмет с id : " + itemId + " не найден."));
         if (!ownerId.equals(oldItem.getOwner().getId())) {
-            throw new NotFoundException("Попытка обновления не принадлежащей владельцу вещи");
+            throw new NotFoundException("Попытка обновления не принадлежащго владельцу предмета");
         }
         if (inputItemDto.getName() != null) {
             oldItem.setName(inputItemDto.getName());
@@ -52,6 +52,7 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.save(oldItem);
         return itemInDto(item);
     }
+
     @Transactional
     @Override
     public ItemDto create(ItemDto inputItemDto, Long ownerId) {
@@ -65,7 +66,8 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDtoBooking findItemById(Long itemId, Long userId) {
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Предмет с id : " + itemId + " не найден."));;
+                .orElseThrow(() -> new NotFoundException("Предмет с id : " + itemId + " не найден."));
+        ;
         final List<CommentDtoResponse> comments = commentRepository.findAllByItemId(itemId)
                 .stream()
                 .map(CommentMapper::toCommentResponseDto)
@@ -110,15 +112,15 @@ public class ItemServiceImpl implements ItemService {
     public CommentDtoResponse createComment(Long userId, CommentDto commentDto, Long itemId) {
         final Comment comment = toComment(commentDto);
         final User author = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundEntityExeption("Пользователь с id : " + userId + " не найден."));
+                .orElseThrow(() -> new NotFoundException("Пользователь с id : " + userId + " не найден."));
         final Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundEntityExeption("Item с id : " + itemId + " не найден."));
+                .orElseThrow(() -> new NotFoundException("Предмет с id : " + itemId + " не найден."));
         List<Booking> bookings = bookingRepository.findByItem_IdAndEndIsBefore(itemId, comment.getCreated())
                 .stream()
                 .filter(booking -> Objects.equals(booking.getBooker().getId(), userId))
                 .collect(Collectors.toList());
         if (bookings.isEmpty()) {
-            throw new NotFoundException("Невозможно оставить отзыв.");
+            throw new NotFoundEntityExeption("Невозможно оставить отзыв.");
         }
         comment.setAuthor(author);
         comment.setItem(item);

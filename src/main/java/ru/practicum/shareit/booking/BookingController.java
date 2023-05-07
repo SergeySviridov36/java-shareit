@@ -18,7 +18,7 @@ public class BookingController {
     public BookingDto create(@RequestHeader("X-Sharer-User-Id") Long userId,
                              @Valid @RequestBody BookingDtoJson bookingJsonDto) {
         BookingDto bookingDto = bookingService.create(bookingJsonDto, userId);
-        log.debug("Создан booking на item с идентификатором : {}", bookingJsonDto.getItemId());
+        log.debug("Забронирован предмет с id : {}", bookingJsonDto.getItemId());
         return bookingDto;
     }
 
@@ -28,7 +28,7 @@ public class BookingController {
                              @RequestParam(value = "approved") String approved) {
         boolean isApproved = approved.equals("true");
         BookingDto bookingDto = bookingService.update(bookingId, userId, isApproved);
-        log.debug("Обновлен статус booking на item с идентификатором : {}", bookingId);
+        log.debug("Обновлен статус ронирования предмета с id : {}", bookingId);
         return bookingDto;
     }
 
@@ -36,7 +36,7 @@ public class BookingController {
     public BookingDto findById(@RequestHeader("X-Sharer-User-Id") Long userId,
                                @PathVariable Long bookingId) {
         BookingDto bookingDto = bookingService.findById(userId, bookingId);
-        log.debug("Получен booking с идентификатором : {}", bookingId);
+        log.debug("Информация о бронировании с id : {}", bookingId);
         return bookingDto;
     }
 
@@ -44,7 +44,7 @@ public class BookingController {
     public List<BookingDto> findAllByBooker(@RequestHeader("X-Sharer-User-Id") Long userId,
                                             @RequestParam(value = "state", defaultValue = "ALL", required = false) String state) {
         List<BookingDto> bookingDtoList = bookingService.findAllByBooker(userId, state);
-        log.debug("Получен список bookings пользователя с id : {}", userId);
+        log.debug("Получен список забронированных предметов пользователя с id : {}", userId);
         return bookingDtoList;
     }
 
@@ -52,7 +52,7 @@ public class BookingController {
     public List<BookingDto> findAllByOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
                                            @RequestParam(value = "state", defaultValue = "ALL", required = false) String state) {
         List<BookingDto> bookingDtoList = bookingService.findAllByOwner(userId, state);
-        log.debug("Получен список bookings для вещей пользователя с id : {}", userId);
+        log.debug("Получен список забронированных предметов пользователя с id : {}", userId);
         return bookingDtoList;
     }
 }
