@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.comment;
 
 public class CommentMapper {
     public static Comment toComment(CommentDto commentDto) {

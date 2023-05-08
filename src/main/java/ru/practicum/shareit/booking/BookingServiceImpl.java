@@ -29,19 +29,9 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto create(BookingDtoJson bookingJsonDto, Long userId) {
-        if (bookingJsonDto.getEnd().isBefore(bookingJsonDto.getStart()) ||
-                bookingJsonDto.getEnd().equals(bookingJsonDto.getStart()))
-            throw new NotFoundEntityExeption("Ошибка даты бронирования.");
-        final Long itemId = bookingJsonDto.getItemId();
-        final User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id : " + userId + " не найден."));
-        final Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Предмет с id : " + itemId + " не найден."));
-        if (!item.getIsAvailable())
-            throw new NotFoundEntityExeption("Предмет не доступен для бронирования.");
-        final Long id = item.getOwner().getId();
-        if (Objects.equals(id, userId))
-            throw new NotFoundException("Бронирование своего предмета запрещено.");
+        checkDateBooking(bookingJsonDto);
+        final User user = findAndCheckUserId(userId);
+        final Item item = findAndCheckAccessBookingItemId(bookingJsonDto, userId);
         final Booking booking = toBooking(bookingJsonDto, item, user);
         return toBookingDto(bookingRepository.save(booking));
     }
@@ -73,8 +63,7 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDto> findAllByBooker(Long userId, String state) {
         final BookingState bookingState = BookingState.from(state)
                 .orElseThrow(() -> new NotFoundEntityExeption("Unknown state: " + state));
-        final User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id : " + userId + " не найден."));
+        final User user = findAndCheckUserId(userId);
         final LocalDateTime date = LocalDateTime.now();
         final Sort sort = Sort.by("start").descending();
         List<Booking> bookings;
@@ -110,8 +99,7 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDto> findAllByOwner(Long userId, String state) {
         final BookingState bookingState = BookingState.from(state)
                 .orElseThrow(() -> new NotFoundEntityExeption("Unknown state: " + state));
-        final User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id : " + userId + " не найден."));
+        final User user = findAndCheckUserId(userId);
         final List<Long> itemIdList = itemRepository.findAllByOwnerId(userId)
                 .stream()
                 .map(Item::getId)
@@ -145,6 +133,29 @@ public class BookingServiceImpl implements BookingService {
                 .stream()
                 .map(BookingMapper::toBookingDto)
                 .collect(Collectors.toList());
+    }
+
+    private void checkDateBooking(BookingDtoJson bookingJsonDto) {
+        if (bookingJsonDto.getEnd().isBefore(bookingJsonDto.getStart()) ||
+                bookingJsonDto.getEnd().equals(bookingJsonDto.getStart()))
+            throw new NotFoundEntityExeption("Ошибка даты бронирования.");
+    }
+
+    private User findAndCheckUserId(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id : " + userId + " не найден."));
+    }
+
+    private Item findAndCheckAccessBookingItemId(BookingDtoJson bookingJsonDto, Long userId) {
+        final Long itemId = bookingJsonDto.getItemId();
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Предмет с id : " + itemId + " не найден."));
+        if (!item.getIsAvailable())
+            throw new NotFoundEntityExeption("Предмет не доступен для бронирования.");
+        final Long id = item.getOwner().getId();
+        if (Objects.equals(id, userId))
+            throw new NotFoundException("Бронирование своего предмета запрещено.");
+        return item;
     }
 }
 

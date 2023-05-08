@@ -8,6 +8,7 @@ import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.exception.NotFoundEntityExeption;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.comment.*;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -19,8 +20,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.booking.BookingMapper.toBookingItemDto;
-import static ru.practicum.shareit.item.CommentMapper.toComment;
-import static ru.practicum.shareit.item.CommentMapper.toCommentResponseDto;
+import static ru.practicum.shareit.item.comment.CommentMapper.toComment;
+import static ru.practicum.shareit.item.comment.CommentMapper.toCommentResponseDto;
 import static ru.practicum.shareit.item.ItemMapper.*;
 
 @Service
@@ -76,8 +77,8 @@ public class ItemServiceImpl implements ItemService {
         itemDtoBooking.setComments(comments);
         final Long id = item.getOwner().getId();
         if (Objects.equals(userId, id)) {
-            final List<Booking> bookingList = bookingRepository.findByItem_Id(itemId);
-            return saveDateBookings(itemDtoBooking, bookingList);
+            final List<Booking> bookingList = bookingRepository.findByItem_IdAndStatusIs(itemId, Status.APPROVED);
+            return setDateBookings(itemDtoBooking, bookingList);
         }
         return itemDtoBooking;
     }
@@ -92,10 +93,10 @@ public class ItemServiceImpl implements ItemService {
                 .stream()
                 .map(ItemDtoBooking::getId)
                 .collect(Collectors.toList());
-        final List<Booking> bookingList = bookingRepository.findAllByItem_IdIn(itemsId);
+        final List<Booking> bookingList = bookingRepository.findAllByItem_IdInAndStatusIs(itemsId, Status.APPROVED);
         return list
                 .stream()
-                .map(itemsDto -> saveDateBookings(itemsDto, bookingList))
+                .map(itemsDto -> setDateBookings(itemsDto, bookingList))
                 .collect(Collectors.toList());
     }
 
@@ -128,13 +129,12 @@ public class ItemServiceImpl implements ItemService {
         return toCommentResponseDto(comment);
     }
 
-    private ItemDtoBooking saveDateBookings(ItemDtoBooking itemsDto, List<Booking> bookingList) {
+    private ItemDtoBooking setDateBookings(ItemDtoBooking itemsDto, List<Booking> bookingList) {
         final LocalDateTime time = LocalDateTime.now();
         Optional<Booking> bookingLast = bookingList
                 .stream()
                 .filter(booking -> Objects.equals(booking.getItem().getId(), itemsDto.getId()))
                 .sorted(Comparator.comparing(Booking::getEnd).reversed())
-                .filter(booking -> booking.getStatus().equals(Status.APPROVED))
                 .filter(booking -> booking.getStart().isBefore(time))
                 .limit(1)
                 .findAny();
@@ -144,7 +144,6 @@ public class ItemServiceImpl implements ItemService {
                 .stream()
                 .filter(booking -> Objects.equals(booking.getItem().getId(), itemsDto.getId()))
                 .sorted(Comparator.comparing(Booking::getStart))
-                .filter(booking -> booking.getStatus().equals(Status.APPROVED))
                 .filter(booking -> booking.getStart().isAfter(time))
                 .limit(1)
                 .findAny();
