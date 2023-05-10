@@ -2,10 +2,11 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidateException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.user.UserMapper.userDtoInUser;
@@ -13,57 +14,47 @@ import static ru.practicum.shareit.user.UserMapper.userInDTO;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
     public List<UserDto> findAllUsers() {
-        return userRepository.findAllUsers().stream().map(UserMapper::userInDTO).collect(Collectors.toList());
+        return userRepository.findAll()
+                .stream()
+                .map(UserMapper::userInDTO)
+                .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public UserDto create(UserDto inputUserDto) {
-        checkingEmailCreating(inputUserDto);
-        User user = userRepository.create(userDtoInUser(inputUserDto));
-        userRepository.getListEmail().add(inputUserDto.getEmail());
+        User user = userRepository.save(userDtoInUser(inputUserDto));
         return userInDTO(user);
     }
 
+    @Transactional
     @Override
     public void deleteUser(Long userId) {
-        userRepository.getListEmail().remove(findUserById(userId).getEmail());
-        userRepository.deleteUser(userId);
+        userRepository.deleteById(userId);
     }
 
     @Override
     public UserDto findUserById(Long userId) {
-        User user = userRepository.findUserById(userId);
-        if (user == null) {
-            throw new NotFoundException("Пользователь не найден");
-        }
-        return userInDTO(user);
+        Optional<User> user = userRepository.findById(userId);
+        return userInDTO(user.orElseThrow(() -> new NotFoundException("Пользователь не найден")));
     }
 
+    @Transactional
     @Override
     public UserDto updateUser(Long userId, UserDto inputUserDto) {
-        UserDto userDto = findUserById(userId);
-        if (inputUserDto.getName() != null) {
-            userDto.setName(inputUserDto.getName());
-        }
-        if (inputUserDto.getEmail() != null) {
-            userRepository.getListEmail().remove(userDto.getEmail());
-            checkingEmailCreating(inputUserDto);
-            userDto.setEmail(inputUserDto.getEmail());
-            userRepository.getListEmail().add(inputUserDto.getEmail());
-        }
-        User user = userDtoInUser(userDto);
-        user.setId(userId);
-        User userUpdate = userRepository.updateUser(user);
-        return userInDTO(userUpdate);
-    }
-
-    private void checkingEmailCreating(User inputUser) {
-        if (userRepository.getListEmail().contains(inputUser.getEmail()))
-            throw new ValidateException("Ошибка!Такой Email уже зарегистрирован");
+        final User newUser = userDtoInUser(inputUserDto);
+        newUser.setId(userId);
+        User oldUser = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+        if (newUser.getName() == null)
+            newUser.setName(oldUser.getName());
+        if (newUser.getEmail() == null)
+            newUser.setEmail(oldUser.getEmail());
+        return userInDTO(userRepository.save(newUser));
     }
 }

@@ -4,8 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exception.NotFoundEntityExeption;
+import ru.practicum.shareit.item.comment.CommentDto;
+import ru.practicum.shareit.item.comment.CommentDtoResponse;
 import ru.practicum.shareit.user.UserService;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,10 +24,9 @@ public class ItemController {
     @PostMapping
     public ItemDto create(@RequestBody ItemDto inputItemDto,
                           @RequestHeader(OWNER) Long owner) {
-        userService.findUserById(owner);
         checkingCreating(inputItemDto);
         ItemDto createItem = itemService.create(inputItemDto, owner);
-        log.debug("Добавление вещи пользователем: {}", owner);
+        log.debug("Добавление предмета пользователем: {}", owner);
         return createItem;
     }
 
@@ -33,21 +35,22 @@ public class ItemController {
                           @RequestHeader(OWNER) Long owner,
                           @PathVariable Long itemId) {
         ItemDto updateItem = itemService.update(inputItemDto, owner, itemId);
-        log.debug("Обновление вещи с id: {}", itemId);
+        log.debug("Обновление предмета с id: {}", itemId);
         return updateItem;
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto findItemById(@PathVariable Long itemId) {
-        ItemDto itemDto = itemService.findItemById(itemId);
-        log.debug("Просмотр вещи с id: {}", itemId);
+    public ItemDtoBooking findItemById(@PathVariable Long itemId,
+                                       @RequestHeader(OWNER) Long owner) {
+        ItemDtoBooking itemDto = itemService.findItemById(itemId, owner);
+        log.debug("Просмотр предмета с id: {}", itemId);
         return itemDto;
     }
 
     @GetMapping
-    public List<ItemDto> findAllItems(@RequestHeader(OWNER) Long owner) {
-        List<ItemDto> allItems = itemService.findAllItemsOwner(owner);
-        log.debug("Получение списка всех вещей");
+    public List<ItemDtoBooking> findAllItems(@RequestHeader(OWNER) Long owner) {
+        List<ItemDtoBooking> allItems = itemService.findAllItemsOwner(owner);
+        log.debug("Получение списка всех предметов");
         return allItems;
     }
 
@@ -55,10 +58,19 @@ public class ItemController {
     public List<ItemDto> searchItem(@RequestParam(value = "text") String text) {
         if (!text.isBlank()) {
             List<ItemDto> itemDtoList = itemService.searchItem(text);
-            log.debug("Поиск необходимой вещи");
+            log.debug("Поиск необходимого предмета");
             return itemDtoList;
         }
         return new ArrayList<>();
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDtoResponse createComment(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                            @Valid @RequestBody CommentDto commentDto,
+                                            @PathVariable Long itemId) {
+        CommentDtoResponse newComment = itemService.createComment(userId, commentDto, itemId);
+        log.debug("Добавлен отзыв для предмета с id : {}", itemId);
+        return newComment;
     }
 
     private void checkingCreating(ItemDto inputItemDto) {
