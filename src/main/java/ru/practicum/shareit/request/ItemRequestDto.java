@@ -1,16 +1,23 @@
 package ru.practicum.shareit.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import ru.practicum.shareit.user.User;
 
-import java.time.LocalDate;
+import javax.persistence.Entity;
+import javax.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
 
 @Setter
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode
+@ToString
+@Entity
 public class ItemRequestDto {
-    private String requestor;
+    private Long id;
+    private User requestor;
+    @NotBlank
     private String description;
-    private LocalDate created;
+    private LocalDateTime created;
 }
