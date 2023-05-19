@@ -5,10 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.exception.NotFoundEntityExeption;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -37,8 +36,11 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public List<ItemRequestDto> findAllRequest(@RequestHeader(USER) Long userId,
-                                               @PositiveOrZero @RequestParam(value = "from", defaultValue = "0") Integer from,
-                                               @Positive @RequestParam(value = "size", defaultValue = "10") Integer size) {
+                                               @RequestParam(value = "from", defaultValue = "0") Integer from,
+                                               @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        if (from < 0) {
+            throw new NotFoundEntityExeption("Значение должно быть больше чем 0!");
+        }
         final Sort sort = Sort.by("created").descending();
         final PageRequest page = PageRequest.of(from > 0 ? from / size : 0, size, sort);
         final List<ItemRequestDto> itemRequestDto = itemRequestService.findAllRequest(userId, page);

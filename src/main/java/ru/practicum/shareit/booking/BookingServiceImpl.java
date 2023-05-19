@@ -1,6 +1,8 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundEntityExeption;
@@ -28,7 +30,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
 
     @Override
-    public BookingDto create(BookingDtoJson bookingJsonDto, Long userId) {
+    public BookingDto create(BookingRequestDto bookingJsonDto, Long userId) {
         checkDateBooking(bookingJsonDto);
         final User user = findAndCheckUserId(userId);
         final Item item = findAndCheckAccessBookingItemId(bookingJsonDto, userId);
@@ -60,31 +62,31 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> findAllByBooker(Long userId, String state) {
+    public List<BookingDto> findAllByBooker(Long userId, String state, PageRequest pageRequest) {
         final BookingState bookingState = BookingState.from(state)
                 .orElseThrow(() -> new NotFoundEntityExeption("Unknown state: " + state));
         final User user = findAndCheckUserId(userId);
         final LocalDateTime date = LocalDateTime.now();
         final Sort sort = Sort.by("start").descending();
-        List<Booking> bookings;
+        Page<Booking> bookings;
         switch (bookingState) {
             case ALL:
-                bookings = bookingRepository.findAllByBooker_Id(userId, sort);
+                bookings = bookingRepository.findAllByBooker_Id(userId, pageRequest);
                 break;
             case CURRENT:
-                bookings = bookingRepository.findByBooker_IdAndStartIsBeforeAndEndIsAfter(userId, date, date, sort);
+                bookings = bookingRepository.findByBooker_IdAndStartIsBeforeAndEndIsAfter(userId, date, date, pageRequest);
                 break;
             case PAST:
-                bookings = bookingRepository.findByBooker_IdAndEndIsBefore(userId, date, sort);
+                bookings = bookingRepository.findByBooker_IdAndEndIsBefore(userId, date, pageRequest);
                 break;
             case FUTURE:
-                bookings = bookingRepository.findByBooker_IdAndStartIsAfter(userId, date, sort);
+                bookings = bookingRepository.findByBooker_IdAndStartIsAfter(userId, date, pageRequest);
                 break;
             case WAITING:
-                bookings = bookingRepository.findByBooker_IdAndStartIsAfterAndStatusIs(userId, date, sort, Status.WAITING);
+                bookings = bookingRepository.findByBooker_IdAndStartIsAfterAndStatusIs(userId, date, pageRequest, Status.WAITING);
                 break;
             case REJECTED:
-                bookings = bookingRepository.findByBooker_IdAndStartIsAfterAndStatusIs(userId, date, sort, Status.REJECTED);
+                bookings = bookingRepository.findByBooker_IdAndStartIsAfterAndStatusIs(userId, date, pageRequest, Status.REJECTED);
                 break;
             default:
                 return emptyList();
@@ -96,7 +98,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> findAllByOwner(Long userId, String state) {
+    public List<BookingDto> findAllByOwner(Long userId, String state, PageRequest pageRequest) {
         final BookingState bookingState = BookingState.from(state)
                 .orElseThrow(() -> new NotFoundEntityExeption("Unknown state: " + state));
         final User user = findAndCheckUserId(userId);
@@ -106,25 +108,25 @@ public class BookingServiceImpl implements BookingService {
                 .collect(Collectors.toList());
         final LocalDateTime date = LocalDateTime.now();
         final Sort sort = Sort.by("start").descending();
-        List<Booking> bookings;
+        Page<Booking> bookings;
         switch (bookingState) {
             case ALL:
-                bookings = bookingRepository.findAllByItem_IdIn(itemIdList, sort);
+                bookings = bookingRepository.findAllByItem_IdIn(itemIdList, pageRequest);
                 break;
             case CURRENT:
-                bookings = bookingRepository.findByItem_IdInAndStartIsBeforeAndEndIsAfter(itemIdList, date, date, sort);
+                bookings = bookingRepository.findByItem_IdInAndStartIsBeforeAndEndIsAfter(itemIdList, date, date, pageRequest);
                 break;
             case PAST:
-                bookings = bookingRepository.findByItem_IdInAndEndIsBefore(itemIdList, date, sort);
+                bookings = bookingRepository.findByItem_IdInAndEndIsBefore(itemIdList, date, pageRequest);
                 break;
             case FUTURE:
-                bookings = bookingRepository.findByItem_IdInAndStartIsAfter(itemIdList, date, sort);
+                bookings = bookingRepository.findByItem_IdInAndStartIsAfter(itemIdList, date, pageRequest);
                 break;
             case WAITING:
-                bookings = bookingRepository.findByItem_IdInAndStartIsAfterAndStatusIs(itemIdList, date, sort, Status.WAITING);
+                bookings = bookingRepository.findByItem_IdInAndStartIsAfterAndStatusIs(itemIdList, date, pageRequest, Status.WAITING);
                 break;
             case REJECTED:
-                bookings = bookingRepository.findByItem_IdInAndStartIsAfterAndStatusIs(itemIdList, date, sort, Status.REJECTED);
+                bookings = bookingRepository.findByItem_IdInAndStartIsAfterAndStatusIs(itemIdList, date, pageRequest, Status.REJECTED);
                 break;
             default:
                 return emptyList();
@@ -135,7 +137,7 @@ public class BookingServiceImpl implements BookingService {
                 .collect(Collectors.toList());
     }
 
-    private void checkDateBooking(BookingDtoJson bookingJsonDto) {
+    private void checkDateBooking(BookingRequestDto bookingJsonDto) {
         if (bookingJsonDto.getEnd().isBefore(bookingJsonDto.getStart()) ||
                 bookingJsonDto.getEnd().equals(bookingJsonDto.getStart()))
             throw new NotFoundEntityExeption("Ошибка даты бронирования.");
@@ -146,7 +148,7 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new NotFoundException("Пользователь с id : " + userId + " не найден."));
     }
 
-    private Item findAndCheckAccessBookingItemId(BookingDtoJson bookingJsonDto, Long userId) {
+    private Item findAndCheckAccessBookingItemId(BookingRequestDto bookingJsonDto, Long userId) {
         final Long itemId = bookingJsonDto.getItemId();
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет с id : " + itemId + " не найден."));

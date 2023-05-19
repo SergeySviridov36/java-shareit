@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemDto;
+import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
@@ -20,11 +21,12 @@ import static ru.practicum.shareit.request.ItemRequestMapper.inRequestDto;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class ItemRequestServiceImpl implements ItemRequestService{
+public class ItemRequestServiceImpl implements ItemRequestService {
 
     private final ItemRequestRepository itemRequestRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
+
 
     @Override
     @Transactional
@@ -64,11 +66,11 @@ public class ItemRequestServiceImpl implements ItemRequestService{
             throw new NotFoundException("Пользователь с id : " + userId + " не найден.");
         final ItemRequestDto itemRequest = inRequestDto(itemRequestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Запрос на бронирование вещи не найден.")));
-        final List<ItemDto> itemDtoList = itemRepository.fin(requestId)
+        final List<ItemDto> itemList = itemRepository.findAllByRequestId(requestId)
                 .stream()
-                .map(ItemMapper::toItemDto)
+                .map(ItemMapper::itemInDto)
                 .collect(Collectors.toList());
-        itemRequest.setItems(itemDtoList);
+        itemRequest.setItems(itemList);
         return itemRequest;
     }
 
@@ -83,7 +85,7 @@ public class ItemRequestServiceImpl implements ItemRequestService{
                 .collect(Collectors.toList());
         final List<ItemDto> itemDtoList = itemRepository.findAllByRequestIdIn(listRequestIds)
                 .stream()
-                .map(ItemMapper::toItemDto)
+                .map(ItemMapper::itemInDto)
                 .collect(Collectors.toList());
         itemRequestDto
                 .forEach(r -> r.setItems(itemDtoList

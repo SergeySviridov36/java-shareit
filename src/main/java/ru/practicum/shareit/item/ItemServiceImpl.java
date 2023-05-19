@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
@@ -9,6 +10,8 @@ import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.exception.NotFoundEntityExeption;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.comment.*;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -33,13 +36,15 @@ public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
 
+    private final ItemRequestRepository itemRequestRepository;
+
     @Transactional
     @Override
     public ItemDto update(ItemDto inputItemDto, Long ownerId, Long itemId) {
         final Item oldItem = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет с id : " + itemId + " не найден."));
         if (!ownerId.equals(oldItem.getOwner().getId())) {
-            throw new NotFoundException("Попытка обновления не принадлежащго владельцу предмета");
+            throw new NotFoundException("Попытка обновления не принадлежащего владельцу предмета");
         }
         if (inputItemDto.getName() != null) {
             oldItem.setName(inputItemDto.getName());
@@ -61,6 +66,12 @@ public class ItemServiceImpl implements ItemService {
         final User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id : " + ownerId + " не найден."));
         newItem.setOwner(owner);
+        final Long requestId = inputItemDto.getRequestId();
+        if (requestId != null) {
+            final ItemRequest itemRequest = itemRequestRepository.findById(requestId)
+                    .orElseThrow(() -> new NotFoundException("Запрос на бронирование вещи не найден."));
+            newItem.setRequest(itemRequest);
+        }
         return itemInDto(itemRepository.save(newItem));
     }
 
@@ -84,7 +95,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDtoBooking> findAllItemsOwner(Long id) {
+    public List<ItemDtoBooking> findAllItemsOwner(Long id, PageRequest page) {
         final List<ItemDtoBooking> list = itemRepository.findAllByOwnerId(id)
                 .stream()
                 .map(ItemMapper::toItemDtoBooking)
@@ -101,7 +112,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> searchItem(String text) {
+    public List<ItemDto> searchItem(Long userId, String text, PageRequest page) {
         return itemRepository.search(text)
                 .stream()
                 .map(ItemMapper::itemInDto)

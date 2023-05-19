@@ -4,8 +4,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
@@ -18,16 +17,14 @@ public class BookingDto {
     private Booker booker;
     private Status status;
 
-    @Getter
-    @Setter
+    @Data
     @AllArgsConstructor
     public static class Booker {
         private Long id;
         private String name;
     }
 
-    @Getter
-    @Setter
+    @Data
     @AllArgsConstructor
     public static class Item {
         private Long id;

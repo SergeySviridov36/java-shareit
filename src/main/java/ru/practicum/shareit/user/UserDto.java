@@ -1,12 +1,10 @@
 package ru.practicum.shareit.user;
 
 import lombok.*;
-import ru.practicum.shareit.user.User;
 
 import javax.validation.constraints.Email;
 
-@Setter
-@Getter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)

@@ -7,8 +7,7 @@ import ru.practicum.shareit.user.User;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
@@ -24,7 +23,7 @@ public class ItemDtoBooking {
     private BookingItemDto lastBooking;
     private BookingItemDto nextBooking;
 
-    public ItemDtoBooking(Long id, String name, String description, Boolean available,User owner, Long request) {
+    public ItemDtoBooking(Long id, String name, String description, Boolean available, User owner, Long request) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -33,8 +32,7 @@ public class ItemDtoBooking {
         this.request = request;
     }
 
-    @Getter
-    @Setter
+    @Data
     @AllArgsConstructor
     @NoArgsConstructor
     @EqualsAndHashCode
