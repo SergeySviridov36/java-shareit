@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     Page<Booking> findByBooker_IdAndEndIsBefore(Long bookerId, LocalDateTime end, PageRequest pageRequest);
@@ -33,4 +34,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByItem_IdAndStatusIs(Long itemId, Status status);
 
     List<Booking> findByItem_IdAndEndIsBefore(Long itemId, LocalDateTime date);
+
+    Optional<Booking> findByIdAndItemOwnerId(Long bookingId, Long userId);
 }

@@ -40,7 +40,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto update(Long bookingId, Long userId, boolean isApproved) {
-        Booking booking = bookingRepository.findById(bookingId)
+        User user = findAndCheckUserId(userId);
+        Booking booking = bookingRepository.findByIdAndItemOwnerId(bookingId,userId)
                 .orElseThrow(() -> new NotFoundException("Бронь с id : " + bookingId + " не найдена."));
         final Long id = booking.getItem().getOwner().getId();
         if (!Objects.equals(id, userId))
