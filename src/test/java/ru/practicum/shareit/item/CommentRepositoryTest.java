@@ -56,7 +56,7 @@ public class CommentRepositoryTest {
     }
 
     @Test
-    void FindAllByItemIdTest() {
+    void findAllByItemIdTest() {
         List<Comment> result = commentRepository.findAllByItemId(item.getId());
 
         assertThat(result, notNullValue());

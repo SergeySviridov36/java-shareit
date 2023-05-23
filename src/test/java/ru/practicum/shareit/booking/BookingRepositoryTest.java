@@ -104,8 +104,8 @@ public class BookingRepositoryTest {
 
     @Test
     void findByItem_IdInAndStartIsBeforeAndEndIsAfterTest() {
-        List<Booking> result = bookingRepository.findByItem_IdInAndStartIsBeforeAndEndIsAfter(List.of(item.getId())
-                        , LocalDateTime.now(), LocalDateTime.now(), page)
+        List<Booking> result = bookingRepository.findByItem_IdInAndStartIsBeforeAndEndIsAfter(List.of(item.getId()),
+                        LocalDateTime.now(), LocalDateTime.now(), page)
                 .stream()
                 .collect(Collectors.toList());
 
@@ -115,8 +115,8 @@ public class BookingRepositoryTest {
 
     @Test
     void findByItem_IdInAndEndIsBeforeTest() {
-        List<Booking> result = bookingRepository.findByItem_IdInAndEndIsBefore(List.of(item.getId())
-                        , LocalDateTime.now(), page)
+        List<Booking> result = bookingRepository.findByItem_IdInAndEndIsBefore(List.of(item.getId()),
+                        LocalDateTime.now(), page)
                 .stream()
                 .collect(Collectors.toList());
 
@@ -126,8 +126,8 @@ public class BookingRepositoryTest {
 
     @Test
     void findByBooker_IdAndStartIsAfterAndStatusIsTest() {
-        List<Booking> result = bookingRepository.findByBooker_IdAndStartIsAfterAndStatusIs(user.getId()
-                        , LocalDateTime.now(), page, Status.WAITING)
+        List<Booking> result = bookingRepository.findByBooker_IdAndStartIsAfterAndStatusIs(user.getId(),
+                        LocalDateTime.now(), page, Status.WAITING)
                 .stream()
                 .collect(Collectors.toList());
 
@@ -137,8 +137,8 @@ public class BookingRepositoryTest {
 
     @Test
     void findByItem_IdInAndStartIsAfterAndStatusIsTest() {
-        List<Booking> result = bookingRepository.findByItem_IdInAndStartIsAfterAndStatusIs(List.of(item.getId())
-                        , LocalDateTime.now(), page, Status.WAITING)
+        List<Booking> result = bookingRepository.findByItem_IdInAndStartIsAfterAndStatusIs(List.of(item.getId()),
+                        LocalDateTime.now(), page, Status.WAITING)
                 .stream()
                 .collect(Collectors.toList());
 

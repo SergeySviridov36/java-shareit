@@ -16,7 +16,7 @@ public class CommentDtoTest {
     private JacksonTester<CommentDto> json;
 
     @Test
-    void CommentDtoJsonTest() throws IOException {
+    void commentDtoJsonTest() throws IOException {
         String jsonContent = "{\"text\":\"itemDescription\"}";
 
         CommentDto result = this.json.parse(jsonContent).getObject();

@@ -87,9 +87,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 .stream()
                 .map(ItemMapper::itemInDto)
                 .collect(Collectors.toList());
-        for (ItemRequestDto re : itemRequestDto){
-            for (ItemDto itemDto : itemDtoList){
-                if (itemDto.getRequestId().equals(re.getId())){
+        for (ItemRequestDto re : itemRequestDto) {
+            for (ItemDto itemDto : itemDtoList) {
+                if (itemDto.getRequestId().equals(re.getId())) {
                     re.getItems().add(itemDto);
                 }
             }

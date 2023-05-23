@@ -100,8 +100,8 @@ public class BookingServiceImplTest {
 
         assertThat(result, notNullValue());
         assertThat("isEmpty", result.isEmpty());
-        verify(bookingRepository, times(1)).findByBooker_IdAndStartIsBeforeAndEndIsAfter(any()
-                , any(), any(), any());
+        verify(bookingRepository, times(1)).findByBooker_IdAndStartIsBeforeAndEndIsAfter(any(),
+                any(), any(), any());
         verify(userRepository, times(1)).findById(user.getId());
     }
 
@@ -114,8 +114,8 @@ public class BookingServiceImplTest {
 
         assertThat(result, notNullValue());
         assertThat("isEmpty", result.isEmpty());
-        verify(bookingRepository, times(1)).findByBooker_IdAndStartIsAfterAndStatusIs(any()
-                , any(), any(), any());
+        verify(bookingRepository, times(1)).findByBooker_IdAndStartIsAfterAndStatusIs(any(),
+                any(), any(), any());
         verify(userRepository, times(1)).findById(user.getId());
     }
 
@@ -128,8 +128,8 @@ public class BookingServiceImplTest {
 
         assertThat(result, notNullValue());
         assertThat("isEmpty", result.isEmpty());
-        verify(bookingRepository, times(1)).findByBooker_IdAndStartIsAfterAndStatusIs(any()
-                , any(), any(), any());
+        verify(bookingRepository, times(1)).findByBooker_IdAndStartIsAfterAndStatusIs(any(),
+                any(), any(), any());
         verify(userRepository, times(1)).findById(user.getId());
     }
 
@@ -181,8 +181,8 @@ public class BookingServiceImplTest {
 
         assertThat(result, notNullValue());
         assertThat("isEmpty", result.isEmpty());
-        verify(bookingRepository, times(1)).findByItem_IdInAndStartIsBeforeAndEndIsAfter(any()
-                , any(), any(), any());
+        verify(bookingRepository, times(1)).findByItem_IdInAndStartIsBeforeAndEndIsAfter(any(),
+                any(), any(), any());
         verify(userRepository, times(1)).findById(user.getId());
     }
 
@@ -195,8 +195,8 @@ public class BookingServiceImplTest {
 
         assertThat(result, notNullValue());
         assertThat("isEmpty", result.isEmpty());
-        verify(bookingRepository, times(1)).findByItem_IdInAndStartIsAfterAndStatusIs(any()
-                , any(), any(), any());
+        verify(bookingRepository, times(1)).findByItem_IdInAndStartIsAfterAndStatusIs(any(),
+                any(), any(), any());
         verify(userRepository, times(1)).findById(user.getId());
     }
 
@@ -209,8 +209,8 @@ public class BookingServiceImplTest {
 
         assertThat(result, notNullValue());
         assertThat("isEmpty", result.isEmpty());
-        verify(bookingRepository, times(1)).findByItem_IdInAndStartIsAfterAndStatusIs(any()
-                , any(), any(), any());
+        verify(bookingRepository, times(1)).findByItem_IdInAndStartIsAfterAndStatusIs(any(),
+                any(), any(), any());
         verify(userRepository, times(1)).findById(user.getId());
     }
 
@@ -223,8 +223,8 @@ public class BookingServiceImplTest {
         when(userRepository.findById(userId))
                 .thenReturn(Optional.of(user));
 
-        BookingRequestDto bookingRequestDto = new BookingRequestDto(1L, LocalDateTime.now()
-                , LocalDateTime.now().plusDays(1));
+        BookingRequestDto bookingRequestDto = new BookingRequestDto(1L, LocalDateTime.now(),
+                LocalDateTime.now().plusDays(1));
 
         Item item = new Item();
         item.setId(3L);

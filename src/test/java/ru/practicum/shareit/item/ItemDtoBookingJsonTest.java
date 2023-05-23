@@ -10,7 +10,7 @@ import java.io.IOException;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @JsonTest
-public class itemDtoBookingJsonTest {
+public class ItemDtoBookingJsonTest {
     @Autowired
     private JacksonTester<ItemDto> json;
 
