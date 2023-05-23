@@ -2,7 +2,7 @@ package ru.practicum.shareit.booking;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jooq.JooqTest;
+import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 
 import java.io.IOException;
@@ -10,11 +10,12 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@JooqTest
+@JsonTest
 public class BookingRequestDtoClassTest {
 
-@Autowired
-private JacksonTester<BookingRequestDto> jacksonTester;
+    @Autowired
+    private JacksonTester<BookingRequestDto> jacksonTester;
+
     @Test
     void bookingRequestDtoTest() throws IOException {
         var jsonContent = "{\"itemId\":\"1\", \"start\":\"2024-05-22T12:00:01\", \"end\":\"2024-05-23T13:00:01\"}";

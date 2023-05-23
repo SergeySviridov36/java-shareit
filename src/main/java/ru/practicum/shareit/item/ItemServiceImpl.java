@@ -41,6 +41,8 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     @Override
     public ItemDto update(ItemDto inputItemDto, Long ownerId, Long itemId) {
+        final  User user = userRepository.findById(ownerId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id : " + ownerId + " не найден."));
         final Item oldItem = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет с id : " + itemId + " не найден."));
         if (!ownerId.equals(oldItem.getOwner().getId())) {
@@ -77,6 +79,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDtoBooking findItemById(Long itemId, Long userId) {
+        final  User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id : " + userId + " не найден."));
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет с id : " + itemId + " не найден."));
         ;
@@ -96,7 +100,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDtoBooking> findAllItemsOwner(Long id, PageRequest page) {
-        final List<ItemDtoBooking> list = itemRepository.findAllByOwnerId(id)
+        final  User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id : " + id + " не найден."));
+        final List<ItemDtoBooking> list = itemRepository.findAllByOwnerId(id,page)
                 .stream()
                 .map(ItemMapper::toItemDtoBooking)
                 .collect(Collectors.toList());
@@ -113,7 +119,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> searchItem(Long userId, String text, PageRequest page) {
-        return itemRepository.search(text)
+        final  User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id : " + userId + " не найден."));
+        return itemRepository.search(text,text,page)
                 .stream()
                 .map(ItemMapper::itemInDto)
                 .collect(Collectors.toList());

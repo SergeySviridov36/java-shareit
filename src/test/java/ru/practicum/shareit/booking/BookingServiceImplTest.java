@@ -16,6 +16,7 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -29,10 +30,8 @@ import static org.mockito.Mockito.*;
 public class BookingServiceImplTest {
     @Mock
     private final ItemRepository itemRepository;
-
     @Mock
     private final UserRepository userRepository;
-
     @Mock
     private final BookingRepository bookingRepository;
 
@@ -40,7 +39,7 @@ public class BookingServiceImplTest {
     private User user;
 
     @BeforeEach
-    public void createEnvironment() {
+    public void addEnvironsForAll() {
         bookingService = new BookingServiceImpl(itemRepository, userRepository, bookingRepository);
         user = new User();
         user.setId(1L);
@@ -54,11 +53,11 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void getAllBookingsByBooker() {
+    void findAllBookingsByBookerTest() {
         when(bookingRepository.findAllByBooker_Id(any(), any()))
                 .thenReturn(Page.empty());
 
-        var result = bookingService.findAllByBooker(1L, "ALL", PageRequest.of(0, 10));
+        List<BookingDto> result = bookingService.findAllByBooker(1L, "ALL", PageRequest.of(0, 10));
 
         assertThat(result, notNullValue());
         assertThat("isEmpty", result.isEmpty());
@@ -67,11 +66,11 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void getPastBookingsByBooker() {
+    void findPastBookingsByBookerTest() {
         when(bookingRepository.findByBooker_IdAndEndIsBefore(any(), any(), any()))
                 .thenReturn(Page.empty());
 
-        var result = bookingService.findAllByBooker(1L, "PAST", PageRequest.of(0, 10));
+        List<BookingDto> result = bookingService.findAllByBooker(1L, "PAST", PageRequest.of(0, 10));
 
         assertThat(result, notNullValue());
         assertThat("isEmpty", result.isEmpty());
@@ -80,11 +79,11 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void getFutureBookingsByBooker() {
+    void findFutureBookingsByBookerTest() {
         when(bookingRepository.findByBooker_IdAndStartIsAfter(any(), any(), any()))
                 .thenReturn(Page.empty());
 
-        var result = bookingService.findAllByBooker(1L, "FUTURE", PageRequest.of(0, 10));
+        List<BookingDto> result = bookingService.findAllByBooker(1L, "FUTURE", PageRequest.of(0, 10));
 
         assertThat(result, notNullValue());
         assertThat("isEmpty", result.isEmpty());
@@ -93,50 +92,53 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void getCurrentBookingsByBooker() {
+    void findCurrentBookingsByBookerTest() {
         when(bookingRepository.findByBooker_IdAndStartIsBeforeAndEndIsAfter(any(), any(), any(), any()))
                 .thenReturn(Page.empty());
 
-        var result = bookingService.findAllByBooker(1L, "CURRENT", PageRequest.of(0, 10));
+        List<BookingDto> result = bookingService.findAllByBooker(1L, "CURRENT", PageRequest.of(0, 10));
 
         assertThat(result, notNullValue());
         assertThat("isEmpty", result.isEmpty());
-        verify(bookingRepository, times(1)).findByBooker_IdAndStartIsBeforeAndEndIsAfter(any(), any(), any(), any());
+        verify(bookingRepository, times(1)).findByBooker_IdAndStartIsBeforeAndEndIsAfter(any()
+                , any(), any(), any());
         verify(userRepository, times(1)).findById(user.getId());
     }
 
     @Test
-    void getWaitingBookingsByBooker() {
+    void findWaitingBookingsByBookerTest() {
         when(bookingRepository.findByBooker_IdAndStartIsAfterAndStatusIs(any(), any(), any(), any()))
                 .thenReturn(Page.empty());
 
-        var result = bookingService.findAllByBooker(1L, "WAITING", PageRequest.of(0, 10));
+        List<BookingDto> result = bookingService.findAllByBooker(1L, "WAITING", PageRequest.of(0, 10));
 
         assertThat(result, notNullValue());
         assertThat("isEmpty", result.isEmpty());
-        verify(bookingRepository, times(1)).findByBooker_IdAndStartIsAfterAndStatusIs(any(), any(), any(), any());
+        verify(bookingRepository, times(1)).findByBooker_IdAndStartIsAfterAndStatusIs(any()
+                , any(), any(), any());
         verify(userRepository, times(1)).findById(user.getId());
     }
 
     @Test
-    void getRejectedBookingsByBooker() {
+    void findRejectedBookingsByBookerTest() {
         when(bookingRepository.findByBooker_IdAndStartIsAfterAndStatusIs(any(), any(), any(), any()))
                 .thenReturn(Page.empty());
 
-        var result = bookingService.findAllByBooker(1L, "REJECTED", PageRequest.of(0, 10));
+        List<BookingDto> result = bookingService.findAllByBooker(1L, "REJECTED", PageRequest.of(0, 10));
 
         assertThat(result, notNullValue());
         assertThat("isEmpty", result.isEmpty());
-        verify(bookingRepository, times(1)).findByBooker_IdAndStartIsAfterAndStatusIs(any(), any(), any(), any());
+        verify(bookingRepository, times(1)).findByBooker_IdAndStartIsAfterAndStatusIs(any()
+                , any(), any(), any());
         verify(userRepository, times(1)).findById(user.getId());
     }
 
     @Test
-    void getAllOwnerBookings() {
+    void findAllOwnerBookingsTest() {
         when(bookingRepository.findAllByItem_IdIn(any(), any()))
                 .thenReturn(Page.empty());
 
-        var result = bookingService.findAllByOwner(1L, "ALL", PageRequest.of(0, 10));
+        List<BookingDto> result = bookingService.findAllByOwner(1L, "ALL", PageRequest.of(0, 10));
 
         assertThat(result, notNullValue());
         assertThat("isEmpty", result.isEmpty());
@@ -145,11 +147,11 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void getPastOwnerBookings() {
+    void findPastOwnerBookingsTest() {
         when(bookingRepository.findByItem_IdInAndEndIsBefore(any(), any(), any()))
                 .thenReturn(Page.empty());
 
-        var result = bookingService.findAllByOwner(1L, "PAST", PageRequest.of(0, 10));
+        List<BookingDto> result = bookingService.findAllByOwner(1L, "PAST", PageRequest.of(0, 10));
 
         assertThat(result, notNullValue());
         assertThat("isEmpty", result.isEmpty());
@@ -158,11 +160,11 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void getFutureOwnerBookings() {
+    void findFutureOwnerBookingsTest() {
         when(bookingRepository.findByItem_IdInAndStartIsAfter(any(), any(), any()))
                 .thenReturn(Page.empty());
 
-        var result = bookingService.findAllByOwner(1L, "FUTURE", PageRequest.of(0, 10));
+        List<BookingDto> result = bookingService.findAllByOwner(1L, "FUTURE", PageRequest.of(0, 10));
 
         assertThat(result, notNullValue());
         assertThat("isEmpty", result.isEmpty());
@@ -171,54 +173,58 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void getCurrentOwnerBookings() {
+    void findCurrentOwnerBookingsTest() {
         when(bookingRepository.findByItem_IdInAndStartIsBeforeAndEndIsAfter(any(), any(), any(), any()))
                 .thenReturn(Page.empty());
 
-        var result = bookingService.findAllByOwner(1L, "CURRENT", PageRequest.of(0, 10));
+        List<BookingDto> result = bookingService.findAllByOwner(1L, "CURRENT", PageRequest.of(0, 10));
 
         assertThat(result, notNullValue());
         assertThat("isEmpty", result.isEmpty());
-        verify(bookingRepository, times(1)).findByItem_IdInAndStartIsBeforeAndEndIsAfter(any(), any(), any(), any());
+        verify(bookingRepository, times(1)).findByItem_IdInAndStartIsBeforeAndEndIsAfter(any()
+                , any(), any(), any());
         verify(userRepository, times(1)).findById(user.getId());
     }
 
     @Test
-    void getWaitingOwnerBookings() {
+    void findWaitingOwnerBookingsTest() {
         when(bookingRepository.findByItem_IdInAndStartIsAfterAndStatusIs(any(), any(), any(), any()))
                 .thenReturn(Page.empty());
 
-        var result = bookingService.findAllByOwner(1L, "WAITING", PageRequest.of(0, 10));
+        List<BookingDto> result = bookingService.findAllByOwner(1L, "WAITING", PageRequest.of(0, 10));
 
         assertThat(result, notNullValue());
         assertThat("isEmpty", result.isEmpty());
-        verify(bookingRepository, times(1)).findByItem_IdInAndStartIsAfterAndStatusIs(any(), any(), any(), any());
+        verify(bookingRepository, times(1)).findByItem_IdInAndStartIsAfterAndStatusIs(any()
+                , any(), any(), any());
         verify(userRepository, times(1)).findById(user.getId());
     }
 
     @Test
-    void getRejectedOwnerBookings() {
+    void findRejectedOwnerBookingsTest() {
         when(bookingRepository.findByItem_IdInAndStartIsAfterAndStatusIs(any(), any(), any(), any()))
                 .thenReturn(Page.empty());
 
-        var result = bookingService.findAllByOwner(1L, "REJECTED", PageRequest.of(0, 10));
+        List<BookingDto> result = bookingService.findAllByOwner(1L, "REJECTED", PageRequest.of(0, 10));
 
         assertThat(result, notNullValue());
         assertThat("isEmpty", result.isEmpty());
-        verify(bookingRepository, times(1)).findByItem_IdInAndStartIsAfterAndStatusIs(any(), any(), any(), any());
+        verify(bookingRepository, times(1)).findByItem_IdInAndStartIsAfterAndStatusIs(any()
+                , any(), any(), any());
         verify(userRepository, times(1)).findById(user.getId());
     }
 
     @Test
-    void saveBooking() {
-        var userId = 1L;
-        var user = new User();
+    void createBookingTest() {
+        long userId = 1L;
+        User user = new User();
         user.setId(2L);
 
         when(userRepository.findById(userId))
                 .thenReturn(Optional.of(user));
 
-        var bookingRequestDto = new BookingRequestDto(1L, LocalDateTime.now(), LocalDateTime.now().plusDays(1));
+        BookingRequestDto bookingRequestDto = new BookingRequestDto(1L, LocalDateTime.now()
+                , LocalDateTime.now().plusDays(1));
 
         Item item = new Item();
         item.setId(3L);
@@ -228,7 +234,7 @@ public class BookingServiceImplTest {
         when(itemRepository.findById(bookingRequestDto.getItemId()))
                 .thenReturn(Optional.of(item));
 
-        var result = bookingService.create(bookingRequestDto, userId);
+        BookingDto result = bookingService.create(bookingRequestDto, userId);
 
         assertThat(result, notNullValue());
         verify(userRepository, times(1)).findById(userId);
@@ -236,8 +242,8 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void getBooking() {
-        var bookingId = 2L;
+    void findBookingTest() {
+        long bookingId = 2L;
 
         when(bookingRepository.findById(bookingId))
                 .thenReturn(Optional.empty());
@@ -248,9 +254,9 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void setBookingStateApproved() {
-        var bookingId = 2L;
-        var approved = true;
+    void setBookingStateApprovedTest() {
+        long bookingId = 2L;
+        boolean approved = true;
         Item item = new Item();
         item.setId(3L);
         item.setOwner(user);
@@ -265,7 +271,7 @@ public class BookingServiceImplTest {
         when(bookingRepository.findByIdAndItemOwnerId(bookingId, user.getId()))
                 .thenReturn(Optional.of(booking));
 
-        var result = bookingService.update(bookingId, user.getId(), approved);
+        BookingDto result = bookingService.update(bookingId, user.getId(), approved);
 
         assertThat(result, notNullValue());
         assertThat(result.getStatus(), equalTo(Status.APPROVED));
@@ -274,14 +280,14 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void setBookingStateRejected() {
-        var bookingId = 2L;
-        var approved = false;
+    void setBookingStateRejectedTest() {
+        long bookingId = 2L;
+        boolean approved = false;
         Item item = new Item();
         item.setId(3L);
         item.setOwner(user);
         item.setIsAvailable(true);
-        var booking = new Booking();
+        Booking booking = new Booking();
         booking.setId(3L);
         booking.setStatus(Status.WAITING);
         booking.setStart(LocalDateTime.now().plusDays(1));
@@ -291,7 +297,7 @@ public class BookingServiceImplTest {
         when(bookingRepository.findByIdAndItemOwnerId(bookingId, user.getId()))
                 .thenReturn(Optional.of(booking));
 
-        var result = bookingService.update(bookingId, user.getId(), approved);
+        BookingDto result = bookingService.update(bookingId, user.getId(), approved);
 
         assertThat(result, notNullValue());
         assertThat(result.getStatus(), equalTo(Status.REJECTED));

@@ -47,7 +47,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 .stream()
                 .map(ItemRequestMapper::inRequestDto)
                 .collect(Collectors.toList());
-        return addResponse(itemRequest);
+        return addItemsToRequest(itemRequest);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         final List<ItemRequestDto> itemRequest = itemRequestRepository.findAllByRequestor_IdNot(userId, page)
                 .map(ItemRequestMapper::inRequestDto)
                 .getContent();
-        return addResponse(itemRequest);
+        return addItemsToRequest(itemRequest);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         return userRepository.existsById(userId);
     }
 
-    private List<ItemRequestDto> addResponse(List<ItemRequestDto> itemRequestDto) {
+    private List<ItemRequestDto> addItemsToRequest(List<ItemRequestDto> itemRequestDto) {
         final List<Long> listRequestIds = itemRequestDto
                 .stream()
                 .map(ItemRequestDto::getId)
@@ -87,11 +87,13 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 .stream()
                 .map(ItemMapper::itemInDto)
                 .collect(Collectors.toList());
-        itemRequestDto
-                .forEach(r -> r.setItems(itemDtoList
-                        .stream()
-                        .filter(itemDto -> itemDto.getRequestId().equals(r.getId()))
-                        .collect(Collectors.toList())));
+        for (ItemRequestDto re : itemRequestDto){
+            for (ItemDto itemDto : itemDtoList){
+                if (itemDto.getRequestId().equals(re.getId())){
+                    re.getItems().add(itemDto);
+                }
+            }
+        }
         return itemRequestDto;
     }
 }

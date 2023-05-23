@@ -5,6 +5,7 @@ import ru.practicum.shareit.item.ItemDto;
 
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -14,8 +15,10 @@ import java.util.List;
 @ToString
 public class ItemRequestDto {
     private Long id;
-    private List<ItemDto> items;
+    private List<ItemDto> items = new ArrayList<>();
     @NotBlank
     private String description;
     private LocalDateTime created;
+
+
 }

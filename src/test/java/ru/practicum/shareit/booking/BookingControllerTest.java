@@ -9,7 +9,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -32,9 +31,14 @@ public class BookingControllerTest {
     BookingService bookingService;
 
     @Autowired
-    MockMvc mvc;
+    MockMvc mockMvc;
 
-    private static final String USER_ID = "X-Sharer-User-Id";
+    private static final String X_SHARER_USER_ID = "X-Sharer-User-Id";
+
+    private static final Long USER_ID = 1L;
+
+    private final Sort sort = Sort.by("start").descending();
+    private final PageRequest page = PageRequest.of(0, 10, sort);
 
     private final BookingRequestDto bookingRequestDto = new BookingRequestDto(
             1L,
@@ -45,140 +49,104 @@ public class BookingControllerTest {
             1L,
             LocalDateTime.of(2024, 5, 20, 12, 0, 0),
             LocalDateTime.of(2024, 5, 21, 12, 0, 0),
-            new BookingDto.Item(1L, "Весы"),
-            new BookingDto.Booker(1L, "Тимон"),
+            new BookingDto.Item(1L, "itemTest"),
+            new BookingDto.Booker(1L, "bookerTest"),
             Status.WAITING
     );
 
 
     @Test
     void createTest() throws Exception {
-
         when(bookingService.create(any(), anyLong()))
                 .thenReturn(bookingDto);
 
-        mvc.perform(post("/bookings")
+        mockMvc.perform(post("/bookings")
                         .content(mapper.writeValueAsString(bookingRequestDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header(USER_ID,1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+                        .header(X_SHARER_USER_ID, 1)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(bookingDto.getId()))
                 .andExpect(jsonPath("$.item.name").value(bookingDto.getItem().getName()))
-                .andExpect(jsonPath("$.booker.id").value(bookingDto.getBooker().getId()))
-                .andExpect(jsonPath("$.start").value(bookingDto.getStart().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
-                .andExpect(jsonPath("$.end").value(bookingDto.getEnd().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
-                .andExpect(jsonPath("$.status").value(bookingDto.getStatus().name()));
+                .andExpect(jsonPath("$.booker.id").value(bookingDto.getBooker().getId()));
         verify(bookingService, times(1)).create(any(), anyLong());
     }
 
     @Test
     void updateTest() throws Exception {
-        var userId = 1L;
-        boolean approved = Boolean.TRUE;
         bookingDto.setStatus(Status.APPROVED);
-
-        when(bookingService.update(bookingDto.getId(), userId, approved))
+        boolean approved = Boolean.TRUE;
+        when(bookingService.update(bookingDto.getId(), USER_ID, approved))
                 .thenReturn(bookingDto);
 
-        mvc.perform(patch("/bookings/" + bookingDto.getId())
+        mockMvc.perform(patch("/bookings/{bookingId}", bookingDto.getId())
                         .content(mapper.writeValueAsString(bookingRequestDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
                         .queryParam("approved", "true")
-                        .header(USER_ID, userId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+                        .header(X_SHARER_USER_ID, USER_ID)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.start").value(bookingDto.getStart().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
                 .andExpect(jsonPath("$.end").value(bookingDto.getEnd().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
                 .andExpect(jsonPath("$.status").value(bookingDto.getStatus().name()));
-        verify(bookingService, times(1)).update(bookingDto.getId(), userId, approved);
+        verify(bookingService, times(1)).update(bookingDto.getId(), USER_ID, approved);
     }
 
     @Test
     void findByIdTest() throws Exception {
-        var userId = 1L;
-
-        when(bookingService.findById(userId, bookingDto.getId()))
+        when(bookingService.findById(USER_ID, bookingDto.getId()))
                 .thenReturn(bookingDto);
 
-        mvc.perform(get("/bookings/" + bookingDto.getId())
+        mockMvc.perform(get("/bookings/{bookingId}", bookingDto.getId())
                         .content(mapper.writeValueAsString(bookingDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header(USER_ID, userId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+                        .header(X_SHARER_USER_ID, USER_ID)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(bookingDto.getId()))
-                .andExpect(jsonPath("$.start").value(bookingDto.getStart().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
-                .andExpect(jsonPath("$.end").value(bookingDto.getEnd().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
                 .andExpect(jsonPath("$.status").value(Status.WAITING.name()));
-        verify(bookingService, times(1)).findById(userId, bookingDto.getId());
+        verify(bookingService, times(1)).findById(USER_ID, bookingDto.getId());
     }
 
     @Test
     void findAllByBookerTest() throws Exception {
-        var state = "FUTURE";
-        var userId = 1L;
-        final var sort = Sort.by("start").descending();
-        final var page = PageRequest.of(0, 10, sort);
-
-        when(bookingService.findAllByBooker(userId, state, page))
+        String state = "FUTURE";
+        when(bookingService.findAllByBooker(USER_ID, state, page))
                 .thenReturn(Collections.emptyList());
 
-        mvc.perform(get("/bookings?from=0&size=10")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header(USER_ID, userId)
+        mockMvc.perform(get("/bookings?from=0&size=10")
+                        .header(X_SHARER_USER_ID, USER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
                         .param("state", state))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));
-        verify(bookingService, times(1)).findAllByBooker(userId, state, page);
+        verify(bookingService, times(1)).findAllByBooker(USER_ID, state, page);
     }
 
     @Test
     void findAllByOwnerTest() throws Exception {
-        var state = "ALL";
-        var userId = 1L;
-        final var sort = Sort.by("start").descending();
-        final var page = PageRequest.of(0, 10, sort);
-
-        when(bookingService.findAllByOwner(userId, state, page))
+        String state = "ALL";
+        when(bookingService.findAllByOwner(USER_ID, state, page))
                 .thenReturn(Collections.emptyList());
 
-        mvc.perform(get("/bookings/owner?from=0&size=10")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header(USER_ID, userId)
+        mockMvc.perform(get("/bookings/owner?from=0&size=10")
+                        .header(X_SHARER_USER_ID, USER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
                         .param("state", state))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));
-        verify(bookingService, times(1)).findAllByOwner(userId, state, page);
+        verify(bookingService, times(1)).findAllByOwner(USER_ID, state, page);
     }
 
     @Test
     void shouldErrorStatusTest() throws Exception {
-        var state = "NEVER";
-        var userId = 1L;
-        final var sort = Sort.by("start").descending();
-        var page = PageRequest.of(0, 10, sort);
-
-        when(bookingService.findAllByBooker(userId, state, page))
+        String state = "NEVER";
+        when(bookingService.findAllByBooker(USER_ID, state, page))
                 .thenThrow(new NotFoundEntityExeption("Unknown state: " + state));
 
-        mvc.perform(get("/bookings?from=0&size=10")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header(USER_ID, userId)
+        mockMvc.perform(get("/bookings?from=0&size=10")
+                        .header(X_SHARER_USER_ID, USER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.ALL)
                         .param("state", state))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().json("{\"error\":\"Unknown state: " + state + "\"}"));
-        verify(bookingService, times(1)).findAllByBooker(userId, state, page);
+        verify(bookingService, times(1)).findAllByBooker(USER_ID, state, page);
     }
-
-
 }

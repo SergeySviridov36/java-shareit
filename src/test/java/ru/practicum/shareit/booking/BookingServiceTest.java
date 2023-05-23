@@ -12,11 +12,13 @@ import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Transactional
 @AutoConfigureTestDatabase
@@ -33,7 +35,6 @@ public class BookingServiceTest {
     private BookingService bookingService;
     private User user;
     private User owner;
-    private Item item;
     private BookingRequestDto bookingRequestDto;
 
     @BeforeEach
@@ -45,7 +46,7 @@ public class BookingServiceTest {
         owner = new User();
         owner.setName("TestOwner");
         owner.setEmail("TestOwner@mail.ru");
-        item = new Item();
+        Item item = new Item();
         item.setOwner(owner);
         item.setIsAvailable(true);
         item.setName("TestItem1");
@@ -58,7 +59,7 @@ public class BookingServiceTest {
 
     @Test
     void createBookingTest() {
-        var result = bookingService.create(bookingRequestDto, user.getId());
+        BookingDto result = bookingService.create(bookingRequestDto, user.getId());
 
         assertThat(result, notNullValue());
         assertThat(result.getItem().getId(), equalTo(bookingRequestDto.getItemId()));
@@ -66,9 +67,8 @@ public class BookingServiceTest {
 
     @Test
     void updateBookingTest() {
-        var isApproved = true;
-        final Long bookingId = bookingService.create(bookingRequestDto, user.getId()).getId();
-        var result = bookingService.update(bookingId, owner.getId(), isApproved);
+        Long bookingId = bookingService.create(bookingRequestDto, user.getId()).getId();
+        BookingDto result = bookingService.update(bookingId, owner.getId(), true);
 
         assertThat(result, notNullValue());
         assertThat(result.getStatus(), equalTo(Status.APPROVED));
@@ -76,8 +76,8 @@ public class BookingServiceTest {
 
     @Test
     void findByIdTest() {
-        final Long bookingId = bookingService.create(bookingRequestDto, user.getId()).getId();
-        var result = bookingService.findById(user.getId(), bookingId);
+        Long bookingId = bookingService.create(bookingRequestDto, user.getId()).getId();
+        BookingDto result = bookingService.findById(user.getId(), bookingId);
 
         assertThat(result, notNullValue());
         assertThat(result.getId(), equalTo(bookingId));
@@ -86,17 +86,16 @@ public class BookingServiceTest {
     @Test
     void findAllByBookerTest() {
         bookingService.create(bookingRequestDto, user.getId());
-        final var state = "ALL";
-        var result = bookingService.findAllByBooker(user.getId(), state, PageRequest.of(0, 10));
+        List<BookingDto> result = bookingService.findAllByBooker(user.getId(), "ALL", PageRequest.of(0, 10));
 
         assertThat(result, notNullValue());
         assertThat(result.size(), equalTo(1));
     }
+
     @Test
     void findAllByOwnerTest() {
         bookingService.create(bookingRequestDto, user.getId());
-        final var state = "ALL";
-        var result = bookingService.findAllByOwner(owner.getId(), state, PageRequest.of(0, 10));
+        List<BookingDto> result = bookingService.findAllByOwner(owner.getId(), "ALL", PageRequest.of(0, 10));
 
         assertThat(result, notNullValue());
         assertThat(result.size(), equalTo(1));

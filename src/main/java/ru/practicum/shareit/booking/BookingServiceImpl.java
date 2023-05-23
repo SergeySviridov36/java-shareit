@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundEntityExeption;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.Item;
@@ -23,6 +24,7 @@ import static ru.practicum.shareit.booking.BookingMapper.toBookingDto;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class BookingServiceImpl implements BookingService {
 
     private final ItemRepository itemRepository;
@@ -30,6 +32,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
 
     @Override
+    @Transactional
     public BookingDto create(BookingRequestDto bookingJsonDto, Long userId) {
         checkDateBooking(bookingJsonDto);
         final User user = findAndCheckUserId(userId);
@@ -39,6 +42,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
     public BookingDto update(Long bookingId, Long userId, boolean isApproved) {
         User user = findAndCheckUserId(userId);
         Booking booking = bookingRepository.findByIdAndItemOwnerId(bookingId,userId)
