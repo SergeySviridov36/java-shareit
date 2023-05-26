@@ -19,6 +19,4 @@ public class ItemRequestDto {
     @NotBlank
     private String description;
     private LocalDateTime created;
-
-
 }

@@ -10,6 +10,8 @@ import ru.practicum.shareit.exception.NotFoundEntityExeption;
 import javax.validation.Valid;
 import java.util.List;
 
+import static ru.practicum.shareit.util.Constants.*;
+
 @RestController
 @RequestMapping(path = "/requests")
 @RequiredArgsConstructor
@@ -17,27 +19,25 @@ import java.util.List;
 public class ItemRequestController {
     private final ItemRequestServiceImpl itemRequestService;
 
-    private static final String USER = "X-Sharer-User-Id";
-
     @PostMapping
     public ItemRequestDto createRequest(@Valid @RequestBody ItemRequestDto inputItemRequestDto,
-                                        @RequestHeader(USER) Long userId) {
+                                        @RequestHeader(X_SHARER) Long userId) {
         ItemRequestDto createItemRequest = itemRequestService.create(inputItemRequestDto, userId);
         log.debug("Добавление запроса предмета с описанием пользователем: {}", userId);
         return createItemRequest;
     }
 
     @GetMapping
-    public List<ItemRequestDto> findAllRequestByOwner(@RequestHeader(USER) Long userId) {
+    public List<ItemRequestDto> findAllRequestByOwner(@RequestHeader(X_SHARER) Long userId) {
         List<ItemRequestDto> listReguest = itemRequestService.findAllRequestByOwner(userId);
         log.debug("Просмотр всех запросов пользователя с id: {}", userId);
         return listReguest;
     }
 
     @GetMapping("/all")
-    public List<ItemRequestDto> findAllRequest(@RequestHeader(USER) Long userId,
-                                               @RequestParam(value = "from", defaultValue = "0") Integer from,
-                                               @RequestParam(value = "size", defaultValue = "10") Integer size) {
+    public List<ItemRequestDto> findAllRequest(@RequestHeader(X_SHARER) Long userId,
+                                               @RequestParam(value = FROM, defaultValue = "0") Integer from,
+                                               @RequestParam(value = SIZE, defaultValue = "10") Integer size) {
         if (from < 0) {
             throw new NotFoundEntityExeption("Значение должно быть больше чем 0!");
         }
@@ -50,7 +50,7 @@ public class ItemRequestController {
     }
 
     @GetMapping("/{requestId}")
-    public ItemRequestDto findByRequestId(@RequestHeader(USER) Long userId,
+    public ItemRequestDto findByRequestId(@RequestHeader(X_SHARER) Long userId,
                                           @PathVariable Long requestId) {
         final ItemRequestDto itemRequestDto = itemRequestService.findByRequestId(userId, requestId);
         log.debug("Получен запрос с данными о предметах для бронирования: {}", requestId);

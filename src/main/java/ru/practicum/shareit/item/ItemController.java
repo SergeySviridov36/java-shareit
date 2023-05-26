@@ -15,6 +15,8 @@ import javax.validation.constraints.PositiveOrZero;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ru.practicum.shareit.util.Constants.*;
+
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
@@ -22,11 +24,11 @@ import java.util.List;
 @Validated
 public class ItemController {
     private final ItemService itemService;
-    private static final String OWNER = "X-Sharer-User-Id";
+
 
     @PostMapping
     public ItemDto create(@RequestBody ItemDto inputItemDto,
-                          @RequestHeader(OWNER) Long owner) {
+                          @RequestHeader(X_SHARER) Long owner) {
         checkingCreating(inputItemDto);
         ItemDto createItem = itemService.create(inputItemDto, owner);
         log.debug("Добавление предмета пользователем: {}", owner);
@@ -35,7 +37,7 @@ public class ItemController {
 
     @PatchMapping("/{itemId}")
     public ItemDto update(@RequestBody ItemDto inputItemDto,
-                          @RequestHeader(OWNER) Long owner,
+                          @RequestHeader(X_SHARER) Long owner,
                           @PathVariable Long itemId) {
         ItemDto updateItem = itemService.update(inputItemDto, owner, itemId);
         log.debug("Обновление предмета с id: {}", itemId);
@@ -44,16 +46,16 @@ public class ItemController {
 
     @GetMapping("/{itemId}")
     public ItemDtoBooking findItemById(@PathVariable Long itemId,
-                                       @RequestHeader(OWNER) Long owner) {
+                                       @RequestHeader(X_SHARER) Long owner) {
         ItemDtoBooking itemDto = itemService.findItemById(itemId, owner);
         log.debug("Просмотр предмета с id: {}", itemId);
         return itemDto;
     }
 
     @GetMapping
-    public List<ItemDtoBooking> findAllItems(@RequestHeader(OWNER) Long owner,
-                                             @PositiveOrZero @RequestParam(value = "from", defaultValue = "0") Integer from,
-                                             @Positive @RequestParam(value = "size", defaultValue = "10") Integer size) {
+    public List<ItemDtoBooking> findAllItems(@RequestHeader(X_SHARER) Long owner,
+                                             @PositiveOrZero @RequestParam(value = FROM, defaultValue = "0") Integer from,
+                                             @Positive @RequestParam(value = SIZE, defaultValue = "10") Integer size) {
         PageRequest page = PageRequest.of(from > 0 ? from / size : 0, size);
         List<ItemDtoBooking> allItems = itemService.findAllItemsOwner(owner, page);
         log.debug("Получение списка всех предметов");
@@ -61,9 +63,9 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchItem(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public List<ItemDto> searchItem(@RequestHeader(X_SHARER) Long userId,
                                     @RequestParam(value = "text") String text,
-                                    @Valid @PositiveOrZero @RequestParam(value = "from", defaultValue = "0") Integer from,
+                                    @Valid @PositiveOrZero @RequestParam(value = FROM, defaultValue = "0") Integer from,
                                     @Positive @RequestParam(value = "size", defaultValue = "10") Integer size) {
         if (!text.isBlank()) {
             PageRequest page = PageRequest.of(from > 0 ? from / size : 0, size);
@@ -75,7 +77,7 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDtoResponse createComment(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public CommentDtoResponse createComment(@RequestHeader(X_SHARER) Long userId,
                                             @Valid @RequestBody CommentDto commentDto,
                                             @PathVariable Long itemId) {
         CommentDtoResponse newComment = itemService.createComment(userId, commentDto, itemId);

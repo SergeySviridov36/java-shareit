@@ -11,6 +11,8 @@ import ru.practicum.shareit.exception.NotFoundEntityExeption;
 import javax.validation.Valid;
 import java.util.List;
 
+import static ru.practicum.shareit.util.Constants.*;
+
 @RestController
 @RequestMapping(path = "/bookings")
 @Slf4j
@@ -18,11 +20,10 @@ import java.util.List;
 @Validated
 public class BookingController {
     private final BookingService bookingService;
-    private static final String HEADER = "X-Sharer-User-Id";
     private final Sort sort = Sort.by("start").descending();
 
     @PostMapping
-    public BookingDto create(@RequestHeader(HEADER) Long userId,
+    public BookingDto create(@RequestHeader(X_SHARER) Long userId,
                              @Valid @RequestBody BookingRequestDto bookingRequestDto) {
         BookingDto bookingDto = bookingService.create(bookingRequestDto, userId);
         log.debug("Забронирован предмет с id : {}", bookingRequestDto.getItemId());
@@ -30,7 +31,7 @@ public class BookingController {
     }
 
     @PatchMapping("/{bookingId}")
-    public BookingDto update(@RequestHeader(HEADER) Long userId,
+    public BookingDto update(@RequestHeader(X_SHARER) Long userId,
                              @PathVariable Long bookingId,
                              @RequestParam(value = "approved") String approved) {
         boolean isApproved = approved.equals("true");
@@ -40,7 +41,7 @@ public class BookingController {
     }
 
     @GetMapping("/{bookingId}")
-    public BookingDto findById(@RequestHeader(HEADER) Long userId,
+    public BookingDto findById(@RequestHeader(X_SHARER) Long userId,
                                @PathVariable Long bookingId) {
         BookingDto bookingDto = bookingService.findById(userId, bookingId);
         log.debug("Информация о бронировании с id : {}", bookingId);
@@ -48,10 +49,10 @@ public class BookingController {
     }
 
     @GetMapping
-    public List<BookingDto> findAllByBooker(@RequestHeader(HEADER) Long userId,
-                                            @RequestParam(value = "state", defaultValue = "ALL", required = false) String state,
-                                            @RequestParam(value = "from", defaultValue = "0") Integer from,
-                                            @RequestParam(value = "size", defaultValue = "10") Integer size) {
+    public List<BookingDto> findAllByBooker(@RequestHeader(X_SHARER) Long userId,
+                                            @RequestParam(value = STATE, defaultValue = "ALL", required = false) String state,
+                                            @RequestParam(value = FROM, defaultValue = "0") Integer from,
+                                            @RequestParam(value = SIZE, defaultValue = "10") Integer size) {
         if (from < 0) {
             throw new NotFoundEntityExeption("Значение должно быть больше чем 0!");
         }
@@ -62,10 +63,10 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
-    public List<BookingDto> findAllByOwner(@RequestHeader(HEADER) Long userId,
-                                           @RequestParam(value = "state", defaultValue = "ALL", required = false) String state,
-                                           @RequestParam(value = "from", defaultValue = "0") Integer from,
-                                           @RequestParam(value = "size", defaultValue = "10") Integer size) {
+    public List<BookingDto> findAllByOwner(@RequestHeader(X_SHARER) Long userId,
+                                           @RequestParam(value = STATE, defaultValue = "ALL", required = false) String state,
+                                           @RequestParam(value = FROM, defaultValue = "0") Integer from,
+                                           @RequestParam(value = SIZE, defaultValue = "10") Integer size) {
         if (from < 0) {
             throw new NotFoundEntityExeption("Значение должно быть больше чем 0!");
         }

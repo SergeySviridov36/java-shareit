@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.booking.BookingMapper.toBookingItemDto;
 import static ru.practicum.shareit.item.comment.CommentMapper.toComment;
-import static ru.practicum.shareit.item.comment.CommentMapper.toCommentResponseDto;
+import static ru.practicum.shareit.item.comment.CommentMapper.toCommentDtoResponse;
 import static ru.practicum.shareit.item.ItemMapper.*;
 
 @Service
@@ -41,8 +41,9 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     @Override
     public ItemDto update(ItemDto inputItemDto, Long ownerId, Long itemId) {
-        final  User user = userRepository.findById(ownerId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id : " + ownerId + " не найден."));
+        if (!userRepository.existsById(ownerId)){
+            throw new NotFoundException("Пользователь с id : " + ownerId + " не найден.");
+        }
         final Item oldItem = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет с id : " + itemId + " не найден."));
         if (!ownerId.equals(oldItem.getOwner().getId())) {
@@ -79,14 +80,15 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDtoBooking findItemById(Long itemId, Long userId) {
-        final  User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id : " + userId + " не найден."));
+        if (!userRepository.existsById(userId)){
+            throw new NotFoundException("Пользователь с id : " + userId + " не найден.");
+        }
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет с id : " + itemId + " не найден."));
         ;
         final List<CommentDtoResponse> comments = commentRepository.findAllByItemId(itemId)
                 .stream()
-                .map(CommentMapper::toCommentResponseDto)
+                .map(CommentMapper::toCommentDtoResponse)
                 .collect(Collectors.toList());
         final ItemDtoBooking itemDtoBooking = toItemDtoBooking(item);
         itemDtoBooking.setComments(comments);
@@ -100,8 +102,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDtoBooking> findAllItemsOwner(Long id, PageRequest page) {
-        final  User user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id : " + id + " не найден."));
+        if (!userRepository.existsById(id)){
+            throw new NotFoundException("Пользователь с id : " + id + " не найден.");
+        }
         final List<ItemDtoBooking> list = itemRepository.findAllByOwnerId(id,page)
                 .stream()
                 .map(ItemMapper::toItemDtoBooking)
@@ -110,17 +113,20 @@ public class ItemServiceImpl implements ItemService {
                 .stream()
                 .map(ItemDtoBooking::getId)
                 .collect(Collectors.toList());
+        final List<Comment> comments = commentRepository.findAll();
         final List<Booking> bookingList = bookingRepository.findAllByItem_IdInAndStatusIs(itemsId, Status.APPROVED);
         return list
                 .stream()
                 .map(itemsDto -> setDateBookings(itemsDto, bookingList))
+                .map(itemDto -> addCommentsInItem(itemDto, comments))
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<ItemDto> searchItem(Long userId, String text, PageRequest page) {
-        final  User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id : " + userId + " не найден."));
+        if (!userRepository.existsById(userId)){
+            throw new NotFoundException("Пользователь с id : " + userId + " не найден.");
+        }
         return itemRepository.search(text,text,page)
                 .stream()
                 .map(ItemMapper::itemInDto)
@@ -145,7 +151,17 @@ public class ItemServiceImpl implements ItemService {
         comment.setAuthor(author);
         comment.setItem(item);
         commentRepository.save(comment);
-        return toCommentResponseDto(comment);
+        return toCommentDtoResponse(comment);
+    }
+
+    private ItemDtoBooking addCommentsInItem(ItemDtoBooking item, List<Comment> comments) {
+        List<CommentDtoResponse> commentDtoList = comments
+                .stream()
+                .filter(c -> c.getItem().getId().equals(item.getId()))
+                .map(CommentMapper::toCommentDtoResponse)
+                .collect(Collectors.toList());
+        item.setComments(commentDtoList);
+        return item;
     }
 
     private ItemDtoBooking setDateBookings(ItemDtoBooking itemsDto, List<Booking> bookingList) {
