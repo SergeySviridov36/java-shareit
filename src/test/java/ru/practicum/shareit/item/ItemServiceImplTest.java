@@ -88,12 +88,14 @@ public class ItemServiceImplTest {
         item.setOwner(user);
         when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.of(item));
+        when(userRepository.existsById(anyLong()))
+                .thenReturn(true);
 
         ItemDto itemDto = new ItemDto();
         ItemDto result = itemService.update(itemDto, user.getId(), item.getId());
 
         assertThat(result, notNullValue());
-        verify(userRepository, times(1)).findById(anyLong());
+        verify(userRepository, times(1)).existsById(anyLong());
         verify(itemRepository, times(1)).findById(anyLong());
     }
 
@@ -104,6 +106,8 @@ public class ItemServiceImplTest {
         item.setOwner(user);
         when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.of(item));
+        when(userRepository.existsById(anyLong()))
+                .thenReturn(true);
 
         User booker = new User();
         booker.setId(88L);
@@ -128,7 +132,7 @@ public class ItemServiceImplTest {
         ItemDtoBooking result = itemService.findItemById(item.getId(), user.getId());
 
         assertThat(result, notNullValue());
-        verify(userRepository, times(1)).findById(anyLong());
+        verify(userRepository, times(1)).existsById(anyLong());
         verify(itemRepository, times(1)).findById(anyLong());
         verify(commentRepository, times(1)).findAllByItemId(anyLong());
         verify(bookingRepository, times(1)).findByItem_IdAndStatusIs(anyLong(), any());
@@ -141,6 +145,8 @@ public class ItemServiceImplTest {
         item.setOwner(user);
         when(itemRepository.findAllByOwnerId(anyLong(), any()))
                 .thenReturn(Page.empty());
+        when(userRepository.existsById(anyLong()))
+                .thenReturn(true);
 
         User booker = new User();
         booker.setId(56L);
@@ -159,7 +165,7 @@ public class ItemServiceImplTest {
 
         assertThat(result, notNullValue());
         assertThat("isEmpty", result.isEmpty());
-        verify(userRepository, times(1)).findById(anyLong());
+        verify(userRepository, times(1)).existsById(anyLong());
         verify(itemRepository, times(1)).findAllByOwnerId(anyLong(), any());
         verify(bookingRepository, times(1)).findAllByItem_IdInAndStatusIs(anyList(), any());
     }
@@ -169,12 +175,14 @@ public class ItemServiceImplTest {
         when(itemRepository.search(
                 anyString(), anyString(), any()))
                 .thenReturn(Page.empty());
+        when(userRepository.existsById(anyLong()))
+                .thenReturn(true);
 
         List<ItemDto> result = itemService.searchItem(user.getId(), "itemNameTest", PageRequest.of(0, 10));
 
         assertThat(result, notNullValue());
         assertThat("isEmpty", result.isEmpty());
-        verify(userRepository, times(1)).findById(anyLong());
+        verify(userRepository, times(1)).existsById(anyLong());
         verify(itemRepository, times(1))
                 .search(anyString(), anyString(), any());
     }
@@ -193,7 +201,7 @@ public class ItemServiceImplTest {
         when(bookingRepository.findByItem_IdAndEndIsBefore(anyLong(), any()))
                 .thenReturn(Collections.emptyList());
 
-        verify(userRepository, times(0)).findById(user.getId());
+        verify(userRepository, times(0)).existsById(user.getId());
         verify(itemRepository, times(0)).findById(anyLong());
         verify(bookingRepository, times(0)).findByItem_IdAndEndIsBefore(anyLong(), any());
         Assertions.assertThrows(NotFoundEntityExeption.class, () -> itemService.createComment(user.getId(), commentDto, 1L));
