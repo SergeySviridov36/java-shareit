@@ -3,8 +3,7 @@ package ru.practicum.shareit.item;
 import lombok.*;
 import ru.practicum.shareit.user.User;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
@@ -15,6 +14,6 @@ public class ItemDto {
     private String description;
     private Boolean available;
     private User owner;
-    private Long request;
+    private Long requestId;
 }
 

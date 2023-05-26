@@ -7,7 +7,7 @@ public class CommentMapper {
         return comment;
     }
 
-    public static CommentDtoResponse toCommentResponseDto(Comment comment) {
+    public static CommentDtoResponse toCommentDtoResponse(Comment comment) {
         CommentDtoResponse responseDto = new CommentDtoResponse();
         responseDto.setId(comment.getId());
         responseDto.setText(comment.getText());

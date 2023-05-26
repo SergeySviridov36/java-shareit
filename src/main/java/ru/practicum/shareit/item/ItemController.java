@@ -2,28 +2,33 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exception.NotFoundEntityExeption;
 import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.comment.CommentDtoResponse;
-import ru.practicum.shareit.user.UserService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.ArrayList;
 import java.util.List;
+
+import static ru.practicum.shareit.util.Constants.*;
 
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class ItemController {
     private final ItemService itemService;
-    private final UserService userService;
-    private static final String OWNER = "X-Sharer-User-Id";
+
 
     @PostMapping
     public ItemDto create(@RequestBody ItemDto inputItemDto,
-                          @RequestHeader(OWNER) Long owner) {
+                          @RequestHeader(X_SHARER) Long owner) {
         checkingCreating(inputItemDto);
         ItemDto createItem = itemService.create(inputItemDto, owner);
         log.debug("Добавление предмета пользователем: {}", owner);
@@ -32,7 +37,7 @@ public class ItemController {
 
     @PatchMapping("/{itemId}")
     public ItemDto update(@RequestBody ItemDto inputItemDto,
-                          @RequestHeader(OWNER) Long owner,
+                          @RequestHeader(X_SHARER) Long owner,
                           @PathVariable Long itemId) {
         ItemDto updateItem = itemService.update(inputItemDto, owner, itemId);
         log.debug("Обновление предмета с id: {}", itemId);
@@ -41,23 +46,30 @@ public class ItemController {
 
     @GetMapping("/{itemId}")
     public ItemDtoBooking findItemById(@PathVariable Long itemId,
-                                       @RequestHeader(OWNER) Long owner) {
+                                       @RequestHeader(X_SHARER) Long owner) {
         ItemDtoBooking itemDto = itemService.findItemById(itemId, owner);
         log.debug("Просмотр предмета с id: {}", itemId);
         return itemDto;
     }
 
     @GetMapping
-    public List<ItemDtoBooking> findAllItems(@RequestHeader(OWNER) Long owner) {
-        List<ItemDtoBooking> allItems = itemService.findAllItemsOwner(owner);
+    public List<ItemDtoBooking> findAllItems(@RequestHeader(X_SHARER) Long owner,
+                                             @PositiveOrZero @RequestParam(value = FROM, defaultValue = "0") Integer from,
+                                             @Positive @RequestParam(value = SIZE, defaultValue = "10") Integer size) {
+        PageRequest page = PageRequest.of(from > 0 ? from / size : 0, size);
+        List<ItemDtoBooking> allItems = itemService.findAllItemsOwner(owner, page);
         log.debug("Получение списка всех предметов");
         return allItems;
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchItem(@RequestParam(value = "text") String text) {
+    public List<ItemDto> searchItem(@RequestHeader(X_SHARER) Long userId,
+                                    @RequestParam(value = "text") String text,
+                                    @Valid @PositiveOrZero @RequestParam(value = FROM, defaultValue = "0") Integer from,
+                                    @Positive @RequestParam(value = "size", defaultValue = "10") Integer size) {
         if (!text.isBlank()) {
-            List<ItemDto> itemDtoList = itemService.searchItem(text);
+            PageRequest page = PageRequest.of(from > 0 ? from / size : 0, size);
+            List<ItemDto> itemDtoList = itemService.searchItem(userId, text, page);
             log.debug("Поиск необходимого предмета");
             return itemDtoList;
         }
@@ -65,7 +77,7 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDtoResponse createComment(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public CommentDtoResponse createComment(@RequestHeader(X_SHARER) Long userId,
                                             @Valid @RequestBody CommentDto commentDto,
                                             @PathVariable Long itemId) {
         CommentDtoResponse newComment = itemService.createComment(userId, commentDto, itemId);

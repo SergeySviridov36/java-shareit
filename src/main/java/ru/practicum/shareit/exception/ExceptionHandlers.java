@@ -11,13 +11,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ExceptionHandlers {
 
     @ExceptionHandler
-    @ResponseStatus(value = HttpStatus.CONFLICT)
-    public ErrorException exceptionHandler(ValidateException validateException) {
-        log.debug(validateException.getMessage());
-        return new ErrorException(System.currentTimeMillis(), validateException.getMessage());
-    }
-
-    @ExceptionHandler
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public ErrorException exceptionHandler(NotFoundEntityExeption notFoundEntityExeption) {
         log.debug(notFoundEntityExeption.getMessage());

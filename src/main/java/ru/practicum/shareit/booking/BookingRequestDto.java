@@ -7,13 +7,13 @@ import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode
 @ToString
-public class BookingDtoJson {
+public class BookingRequestDto {
+
     @NonNull
     private Long itemId;
 

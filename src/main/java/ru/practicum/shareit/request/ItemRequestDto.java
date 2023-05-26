@@ -1,16 +1,22 @@
 package ru.practicum.shareit.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import ru.practicum.shareit.item.ItemDto;
 
-import java.time.LocalDate;
+import javax.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-@Setter
-@Getter
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode
+@ToString
 public class ItemRequestDto {
-    private String requestor;
+    private Long id;
+    private List<ItemDto> items = new ArrayList<>();
+    @NotBlank
     private String description;
-    private LocalDate created;
+    private LocalDateTime created;
 }
