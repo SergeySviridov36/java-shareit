@@ -41,7 +41,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     @Override
     public ItemDto update(ItemDto inputItemDto, Long ownerId, Long itemId) {
-        if (!userRepository.existsById(ownerId)){
+        if (!userRepository.existsById(ownerId)) {
             throw new NotFoundException("Пользователь с id : " + ownerId + " не найден.");
         }
         final Item oldItem = itemRepository.findById(itemId)
@@ -80,7 +80,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDtoBooking findItemById(Long itemId, Long userId) {
-        if (!userRepository.existsById(userId)){
+        if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Пользователь с id : " + userId + " не найден.");
         }
         Item item = itemRepository.findById(itemId)
@@ -102,10 +102,10 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDtoBooking> findAllItemsOwner(Long id, PageRequest page) {
-        if (!userRepository.existsById(id)){
+        if (!userRepository.existsById(id)) {
             throw new NotFoundException("Пользователь с id : " + id + " не найден.");
         }
-        final List<ItemDtoBooking> list = itemRepository.findAllByOwnerId(id,page)
+        final List<ItemDtoBooking> list = itemRepository.findAllByOwnerId(id, page)
                 .stream()
                 .map(ItemMapper::toItemDtoBooking)
                 .collect(Collectors.toList());
@@ -124,10 +124,10 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> searchItem(Long userId, String text, PageRequest page) {
-        if (!userRepository.existsById(userId)){
+        if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Пользователь с id : " + userId + " не найден.");
         }
-        return itemRepository.search(text,text,page)
+        return itemRepository.search(text, text, page)
                 .stream()
                 .map(ItemMapper::itemInDto)
                 .collect(Collectors.toList());
