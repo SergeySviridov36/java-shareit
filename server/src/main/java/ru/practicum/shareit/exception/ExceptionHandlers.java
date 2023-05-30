@@ -28,6 +28,6 @@ public class ExceptionHandlers {
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorException handleThrowable(final Throwable e) {
         log.warn(e.getMessage());
-        return new ErrorException( System.currentTimeMillis(), e.getMessage());
+        return new ErrorException(System.currentTimeMillis(), e.getMessage());
     }
 }
