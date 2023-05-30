@@ -68,8 +68,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> findAllByBooker(Long userId, String state, PageRequest pageRequest) {
-        final BookingState bookingState = BookingState.from(state)
-                .orElseThrow(() -> new NotFoundEntityExeption("Unknown state: " + state));
+        final BookingState bookingState = BookingState.valueOf(state);
         final User user = findAndCheckUserId(userId);
         final LocalDateTime date = LocalDateTime.now();
         final Sort sort = Sort.by("start").descending();
@@ -104,8 +103,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> findAllByOwner(Long userId, String state, PageRequest pageRequest) {
-        final BookingState bookingState = BookingState.from(state)
-                .orElseThrow(() -> new NotFoundEntityExeption("Unknown state: " + state));
+        final BookingState bookingState = BookingState.valueOf(state);
         final User user = findAndCheckUserId(userId);
         final List<Long> itemIdList = itemRepository.findAllByOwnerId(userId)
                 .stream()

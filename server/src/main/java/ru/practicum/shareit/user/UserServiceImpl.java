@@ -29,8 +29,6 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserDto create(UserDto inputUserDto) {
-        if (inputUserDto.getEmail() == null)
-            throw new NotFoundException("Ошибка! Поле email пусто.");
         User user = userRepository.save(userDtoInUser(inputUserDto));
         return userInDTO(user);
     }

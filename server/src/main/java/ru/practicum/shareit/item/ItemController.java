@@ -3,16 +3,11 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.exception.NotFoundEntityExeption;
 import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.comment.CommentDtoResponse;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
-import java.util.ArrayList;
 import java.util.List;
 
 import static ru.practicum.shareit.util.Constants.*;
@@ -21,7 +16,6 @@ import static ru.practicum.shareit.util.Constants.*;
 @RequestMapping("/items")
 @RequiredArgsConstructor
 @Slf4j
-@Validated
 public class ItemController {
     private final ItemService itemService;
 
@@ -29,7 +23,6 @@ public class ItemController {
     @PostMapping
     public ItemDto create(@RequestBody ItemDto inputItemDto,
                           @RequestHeader(X_SHARER) Long owner) {
-        checkingCreating(inputItemDto);
         ItemDto createItem = itemService.create(inputItemDto, owner);
         log.debug("Добавление предмета пользователем: {}", owner);
         return createItem;
@@ -54,9 +47,10 @@ public class ItemController {
 
     @GetMapping
     public List<ItemDtoBooking> findAllItems(@RequestHeader(X_SHARER) Long owner,
-                                             @PositiveOrZero @RequestParam(value = FROM, defaultValue = "0") Integer from,
-                                             @Positive @RequestParam(value = SIZE, defaultValue = "10") Integer size) {
-        PageRequest page = PageRequest.of(from > 0 ? from / size : 0, size);
+                                             @RequestParam(value = FROM, defaultValue = "0") Integer from,
+                                             @RequestParam(value = SIZE, defaultValue = "10") Integer size) {
+        Sort sort = Sort.by(Sort.Direction.ASC, "id");
+        PageRequest page = PageRequest.of(from > 0 ? from / size : 0, size, sort);
         List<ItemDtoBooking> allItems = itemService.findAllItemsOwner(owner, page);
         log.debug("Получение списка всех предметов");
         return allItems;
@@ -65,33 +59,21 @@ public class ItemController {
     @GetMapping("/search")
     public List<ItemDto> searchItem(@RequestHeader(X_SHARER) Long userId,
                                     @RequestParam(value = "text") String text,
-                                    @Valid @PositiveOrZero @RequestParam(value = FROM, defaultValue = "0") Integer from,
-                                    @Positive @RequestParam(value = "size", defaultValue = "10") Integer size) {
-        if (!text.isBlank()) {
+                                    @RequestParam(value = FROM, defaultValue = "0") Integer from,
+                                    @RequestParam(value = SIZE, defaultValue = "10") Integer size) {
+
             PageRequest page = PageRequest.of(from > 0 ? from / size : 0, size);
             List<ItemDto> itemDtoList = itemService.searchItem(userId, text, page);
             log.debug("Поиск необходимого предмета");
             return itemDtoList;
-        }
-        return new ArrayList<>();
     }
 
     @PostMapping("/{itemId}/comment")
     public CommentDtoResponse createComment(@RequestHeader(X_SHARER) Long userId,
-                                            @Valid @RequestBody CommentDto commentDto,
+                                            @RequestBody CommentDto commentDto,
                                             @PathVariable Long itemId) {
         CommentDtoResponse newComment = itemService.createComment(userId, commentDto, itemId);
         log.debug("Добавлен отзыв для предмета с id : {}", itemId);
         return newComment;
-    }
-
-    private void checkingCreating(ItemDto inputItemDto) {
-        if (inputItemDto.getName().isBlank() ||
-                inputItemDto.getName() == null ||
-                inputItemDto.getDescription() == null ||
-                inputItemDto.getDescription().isBlank() ||
-                inputItemDto.getAvailable() == null) {
-            throw new NotFoundEntityExeption("Ошибка! Не все поля заполнены");
-        }
     }
 }

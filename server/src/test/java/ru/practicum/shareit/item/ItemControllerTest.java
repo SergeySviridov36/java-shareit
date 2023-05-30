@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.item.comment.CommentDto;
@@ -20,7 +21,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 
 @AutoConfigureMockMvc
 @WebMvcTest(ItemController.class)
@@ -115,6 +115,8 @@ public class ItemControllerTest {
 
     @Test
     void findAllItemsTest() throws Exception {
+        Sort sort = Sort.by(Sort.Direction.ASC, "id");
+        PageRequest page = PageRequest.of(0, 10, sort);
         when(itemService.findAllItemsOwner(userId, page))
                 .thenReturn(Collections.emptyList());
 

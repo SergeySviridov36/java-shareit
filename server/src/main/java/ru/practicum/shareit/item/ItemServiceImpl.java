@@ -16,10 +16,7 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.booking.BookingMapper.toBookingItemDto;
@@ -124,6 +121,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> searchItem(Long userId, String text, PageRequest page) {
+        if (text == null || text.isBlank())
+            return Collections.emptyList();
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Пользователь с id : " + userId + " не найден.");
         }

@@ -23,4 +23,11 @@ public class ExceptionHandlers {
         log.debug(notFoundException.getMessage());
         return new ErrorException(System.currentTimeMillis(), notFoundException.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorException handleThrowable(final Throwable e) {
+        log.warn(e.getMessage());
+        return new ErrorException( System.currentTimeMillis(), e.getMessage());
+    }
 }

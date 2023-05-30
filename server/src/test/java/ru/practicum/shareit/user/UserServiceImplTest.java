@@ -40,14 +40,6 @@ public class UserServiceImplTest {
     }
 
     @Test
-    void exceptionWhenEmailNullTest() {
-        userDto.setEmail(null);
-
-        verify(userRepository, times(0)).save(userDtoInUser(userDto));
-        Assertions.assertThrows(NotFoundException.class, () -> userService.create(userDto));
-    }
-
-    @Test
     void createUserTest() {
         UserDto result = userService.create(userDto);
 

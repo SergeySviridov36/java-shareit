@@ -3,9 +3,7 @@ package ru.practicum.shareit.user;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.exception.NotFoundEntityExeption;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @Slf4j
@@ -16,10 +14,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping()
-    public UserDto create(@Valid @RequestBody UserDto inputUserDto) {
-        if (inputUserDto.getEmail() == null) {
-            throw new NotFoundEntityExeption("Ошибка! Поле email пустое");
-        }
+    public UserDto create(@RequestBody UserDto inputUserDto) {
         UserDto userDto = userService.create(inputUserDto);
         log.debug("Создание пользователя: {}", inputUserDto);
         return userDto;
@@ -46,7 +41,7 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}")
-    public UserDto updateUser(@Valid @RequestBody UserDto inputUser, @PathVariable Long userId) {
+    public UserDto updateUser(@RequestBody UserDto inputUser, @PathVariable Long userId) {
         UserDto userDto = userService.updateUser(userId, inputUser);
         log.debug("Обновление пользователя: {}", userId);
         return userDto;

@@ -1,6 +1,8 @@
-package ru.practicum.shareit.item.comment;
+package ru.practicum.shareit.item;
 
 import lombok.*;
+
+import javax.validation.constraints.NotBlank;
 
 @Data
 @AllArgsConstructor
@@ -8,5 +10,6 @@ import lombok.*;
 @EqualsAndHashCode
 @ToString
 public class CommentDto {
+    @NotBlank
     private String text;
 }

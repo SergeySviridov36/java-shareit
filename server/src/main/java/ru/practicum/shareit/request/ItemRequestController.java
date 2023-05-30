@@ -7,7 +7,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exception.NotFoundEntityExeption;
 
-import javax.validation.Valid;
 import java.util.List;
 
 import static ru.practicum.shareit.util.Constants.*;
@@ -20,7 +19,7 @@ public class ItemRequestController {
     private final ItemRequestServiceImpl itemRequestService;
 
     @PostMapping
-    public ItemRequestDto createRequest(@Valid @RequestBody ItemRequestDto inputItemRequestDto,
+    public ItemRequestDto createRequest(@RequestBody ItemRequestDto inputItemRequestDto,
                                         @RequestHeader(X_SHARER) Long userId) {
         ItemRequestDto createItemRequest = itemRequestService.create(inputItemRequestDto, userId);
         log.debug("Добавление запроса предмета с описанием пользователем: {}", userId);
