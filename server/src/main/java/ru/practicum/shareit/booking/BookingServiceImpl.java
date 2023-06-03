@@ -44,7 +44,6 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingDto update(Long bookingId, Long userId, boolean isApproved) {
-        User user = findAndCheckUserId(userId);
         Booking booking = bookingRepository.findByIdAndItemOwnerId(bookingId,userId)
                 .orElseThrow(() -> new NotFoundException("Бронь с id : " + bookingId + " не найдена."));
         final Long id = booking.getItem().getOwner().getId();
@@ -69,9 +68,8 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingDto> findAllByBooker(Long userId, String state, PageRequest pageRequest) {
         final BookingState bookingState = BookingState.valueOf(state);
-        final User user = findAndCheckUserId(userId);
+        findAndCheckUserId(userId);
         final LocalDateTime date = LocalDateTime.now();
-        final Sort sort = Sort.by("start").descending();
         Page<Booking> bookings;
         switch (bookingState) {
             case ALL:
@@ -104,13 +102,12 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingDto> findAllByOwner(Long userId, String state, PageRequest pageRequest) {
         final BookingState bookingState = BookingState.valueOf(state);
-        final User user = findAndCheckUserId(userId);
+        findAndCheckUserId(userId);
         final List<Long> itemIdList = itemRepository.findAllByOwnerId(userId)
                 .stream()
                 .map(Item::getId)
                 .collect(Collectors.toList());
         final LocalDateTime date = LocalDateTime.now();
-        final Sort sort = Sort.by("start").descending();
         Page<Booking> bookings;
         switch (bookingState) {
             case ALL:
